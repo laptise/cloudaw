@@ -6,6 +6,7 @@ import { FireBase } from "../firebase";
 import { collection, doc, setDoc, query, where, getDocs } from "firebase/firestore";
 import Layout, { CommonProps } from "../component/Layout";
 import nookies from "nookies";
+import Link from "next/link";
 import { firebaseAdmin } from "../back/firebaseAdmin";
 import { getUserFromSession } from "../back/auth";
 import { toObject } from "../utils";
@@ -14,10 +15,13 @@ interface PjtProps {
 }
 
 const SelectProject = ({ pjtList }: PjtProps) => {
+  console.log(pjtList);
   return (
     <FlexCol>
       {pjtList.map((pjt, index) => (
-        <span key={index}>{pjt["name"]}</span>
+        <Link href={`/project/${pjt.id}`} passHref key={index}>
+          <span>{pjt["name"]}</span>
+        </Link>
       ))}
     </FlexCol>
   );
@@ -55,7 +59,13 @@ const Dashboard = ({ user }: CommonProps) => {
     const q = query(pjtRef, where("owner", "==", uid));
     const res = await getDocs(q)
       .then((res) => res.docs)
-      .then((docs) => docs.map((x) => x.data()));
+      .then((docs) =>
+        docs.map((x) => {
+          const data = x.data();
+          data.id = x.id;
+          return data;
+        })
+      );
     setPjtList(res);
   };
   useEffect(() => {

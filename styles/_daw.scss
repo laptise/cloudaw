@@ -1,0 +1,49 @@
+#daw {
+  width: 100%;
+  height: 100%;
+  background-color: #ccc;
+  display: flex;
+  flex-direction: column;
+  #playBackCtl {
+    background-color: #333;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .centerRow {
+    flex: 1;
+    #pannels {
+      width: 200px;
+      border: 1px solid gray;
+      border-right: none;
+    }
+    #scores {
+      flex: 1;
+      border: 1px solid gray;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      .channel {
+        border-bottom: 1px solid gray;
+        display: flex;
+        min-width: 2000px;
+
+        .ctl {
+          padding: 10px;
+          position: sticky;
+          left: 0;
+          width: 100px;
+          border-right: 1px solid gray;
+          background-color: white;
+        }
+        .board {
+          flex: 1;
+          height: 100%;
+          background-color: rgb(88, 88, 88);
+        }
+      }
+    }
+  }
+}
