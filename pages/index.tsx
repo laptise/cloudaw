@@ -15,7 +15,6 @@ interface PjtProps {
 }
 
 const SelectProject = ({ pjtList }: PjtProps) => {
-  console.log(pjtList);
   return (
     <FlexCol>
       {pjtList.map((pjt, index) => (
