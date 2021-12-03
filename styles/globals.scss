@@ -73,7 +73,7 @@ main {
   header {
     padding: 5px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     cursor: pointer;
   }
 }
@@ -95,3 +95,4 @@ button {
     transform: translateY(2px);
   }
 }
+@import "profile";

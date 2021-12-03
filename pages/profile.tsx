@@ -12,7 +12,6 @@ interface Props extends CommonProps {
   user: UserRecord;
 }
 const Profile: NextPage<Props> = ({ user }) => {
-  console.log(user);
   const [displayName, setDisplayName] = useState(user.displayName || "");
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -20,7 +19,7 @@ const Profile: NextPage<Props> = ({ user }) => {
     if (auth.currentUser) updateProfile(auth.currentUser, { displayName });
   };
   return (
-    <Layout user={user}>
+    <Layout id="profile" user={user}>
       <form onSubmit={onSubmit}>
         ニックネーム
         <input value={displayName} onInput={(e) => setDisplayName(e.currentTarget.value)} />
