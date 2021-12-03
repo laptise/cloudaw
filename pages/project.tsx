@@ -5,6 +5,8 @@ import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "firebas
 import { FireBase } from "../firebase";
 import { collection, doc, setDoc, query, where, getDocs } from "firebase/firestore";
 import Layout from "../component/Layout";
+import { login } from "../utils/auth";
+import { useRouter } from "next/dist/client/router";
 import nookies from "nookies";
 import { firebaseAdmin } from "../back/firebaseAdmin";
 interface PjtProps {

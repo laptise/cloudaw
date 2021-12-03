@@ -1,0 +1,96 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+div[data-component="flexCol"] {
+  display: flex;
+  flex-direction: column;
+}
+
+div[data-component="flexRow"] {
+  display: flex;
+  flex-direction: row;
+}
+
+#dashboard {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  &.notLoggedIn {
+    filter: blur(1px);
+  }
+}
+
+.window {
+  border-radius: 5px;
+  padding: 5px;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
+  .header {
+    border-bottom: 1px solid #ccc;
+  }
+  .body {
+    &.content {
+      width: calc(100vw - 120px);
+      min-height: 200px;
+      padding: 5px;
+      align-self: flex-start;
+      justify-content: flex-start;
+      gap: 10px;
+      .modeSelect {
+        min-width: 160px;
+        background: rgb(150, 150, 150);
+        background: linear-gradient(333deg, rgba(150, 150, 150, 1) 0%, rgba(236, 236, 236, 1) 100%);
+      }
+      #settingForNew {
+        width: 100%;
+        button {
+          margin-top: auto;
+          margin-left: auto;
+        }
+      }
+    }
+  }
+}
+main {
+  display: flex;
+  flex-direction: column;
+  header {
+  }
+}
+#login {
+  position: fixed;
+  top: calc(50% - 150px);
+  left: calc(50% - 130px);
+  width: 260px;
+  height: 300px;
+  z-index: 1;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 4px;
+}
+button {
+  all: unset;
+  cursor: pointer;
+  transition: all 30ms;
+  &:active {
+    transform: translateY(2px);
+  }
+}
