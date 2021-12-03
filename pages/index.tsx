@@ -4,9 +4,11 @@ import { FlexCol, FlexRow } from "../component/flexBox";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { FireBase } from "../firebase";
 import { collection, doc, setDoc, query, where, getDocs } from "firebase/firestore";
-import Layout from "../component/Layout";
+import Layout, { CommonProps } from "../component/Layout";
 import nookies from "nookies";
 import { firebaseAdmin } from "../back/firebaseAdmin";
+import { getUserFromSession } from "../back/auth";
+import { toObject } from "../utils";
 interface PjtProps {
   pjtList: any[];
 }
@@ -43,11 +45,7 @@ const NewProject = () => {
   );
 };
 
-interface Props {
-  userName: string;
-}
-
-const Dashboard = ({ userName }: Props) => {
+const Dashboard = ({ user }: CommonProps) => {
   const [pjtList, setPjtList] = useState([] as any[]);
   const [isNew, setIsNew] = useState(false);
   const getList = async () => {
@@ -64,7 +62,7 @@ const Dashboard = ({ userName }: Props) => {
     getList();
   }, []);
   return (
-    <Layout userName={userName}>
+    <Layout user={user}>
       <div id="dashboard">
         <FlexCol className="window">
           <FlexCol className="header">
@@ -84,17 +82,9 @@ const Dashboard = ({ userName }: Props) => {
 };
 
 // This gets called on every request
-export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
-  const cookies = nookies.get(ctx);
-  const session = cookies.session || "";
-  // セッションIDを検証して、認証情報を取得する
-  const user = await firebaseAdmin
-    .auth()
-    .verifySessionCookie(session, true)
-    .catch(() => null);
-  // Pass data to the page via props
-
-  if (user?.email) return { props: { userName: user.email } };
+export const getServerSideProps: GetServerSideProps<CommonProps> = async (ctx) => {
+  const user = await getUserFromSession(ctx);
+  if (user) return { props: { user: toObject(user) } };
   else {
     return {
       redirect: {

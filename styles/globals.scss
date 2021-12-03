@@ -26,9 +26,6 @@ div[data-component="flexRow"] {
 }
 
 #dashboard {
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -71,16 +68,20 @@ div[data-component="flexRow"] {
 main {
   display: flex;
   flex-direction: column;
+  width: 100vw;
+  height: 100vh;
   header {
+    padding: 5px;
+    display: flex;
+    justify-content: flex-end;
+    cursor: pointer;
   }
 }
 #login {
-  position: fixed;
   top: calc(50% - 150px);
   left: calc(50% - 130px);
   width: 260px;
   height: 300px;
-  z-index: 1;
   background-color: white;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   padding: 10px;
