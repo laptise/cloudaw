@@ -56,9 +56,8 @@ const ScoreTool: React.FC = (props) => {
 };
 
 const Score: React.FC = (props) => {
-  const { projectState } = useContext(DawContext);
-  const [project] = projectState;
-  const { trackList } = project;
+  const { projectState, tracksState } = useContext(DawContext);
+  const [trackList] = tracksState;
   const [ctlWidth, setCtlWidth] = useState(200);
 
   return (

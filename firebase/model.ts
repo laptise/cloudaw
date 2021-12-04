@@ -1,5 +1,7 @@
 import {
   collection,
+  CollectionReference,
+  doc,
   DocumentData,
   DocumentReference,
   FirestoreDataConverter,
@@ -81,11 +83,15 @@ export const ProjectConverter: FirestoreDataConverter<Project> = {
   },
 };
 
-export const getProjectRef = () => {
+export const getProjectColRef = () => {
   const db = FireBase.fireStore();
   return collection(db, "project").withConverter(ProjectConverter);
 };
 
+export const getProjectDocRef = (colRef: CollectionReference<Project>, id: string) => {
+  return doc(colRef, id);
+};
+
 export const getTrackRef = (docRef: DocumentReference<Project>) => {
-  return collection(docRef, "tracks");
+  return collection(docRef, "tracks").withConverter(dynamicConverter(Track));
 };

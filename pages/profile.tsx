@@ -15,7 +15,7 @@ const Profile: NextPage<Props> = ({ user }) => {
   const [displayName, setDisplayName] = useState(user.displayName || "");
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const auth = await FireBase.auth();
+    const auth = FireBase.auth();
     if (auth.currentUser) updateProfile(auth.currentUser, { displayName });
   };
   return (
