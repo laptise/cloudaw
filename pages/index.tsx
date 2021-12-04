@@ -4,7 +4,7 @@ import { FlexCol, FlexRow } from "../component/flexBox";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { FireBase } from "../firebase";
 import { collection, doc, setDoc, query, where, getDocs, addDoc, getFirestore, onSnapshot } from "firebase/firestore";
-import Layout, { CommonProps } from "../component/Layout";
+import Layout, { UserProps } from "../component/Layout";
 import nookies from "nookies";
 import Link from "next/link";
 import { firebaseAdmin } from "../back/firebaseAdmin";
@@ -55,7 +55,7 @@ const NewProject: React.FC<PjtProps> = ({ pjtList, setPjtList }) => {
   );
 };
 
-const Dashboard = ({ user }: CommonProps) => {
+const Dashboard = ({ user }: UserProps) => {
   const [pjtList, setPjtList] = useState([] as any[]);
   const [isNew, setIsNew] = useState(false);
   const getList = async () => {
@@ -100,7 +100,7 @@ const Dashboard = ({ user }: CommonProps) => {
 };
 
 // This gets called on every request
-export const getServerSideProps: GetServerSideProps<CommonProps> = async (ctx) => {
+export const getServerSideProps: GetServerSideProps<UserProps> = async (ctx) => {
   const user = await getUserFromSession(ctx);
   if (user) return { props: { user: toObject(user) } };
   else {

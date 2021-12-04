@@ -4,7 +4,7 @@ import { FlexCol, FlexRow } from "../component/flexBox";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { FireBase } from "../firebase";
 import { collection, doc, setDoc, query, where, getDocs } from "firebase/firestore";
-import Layout, { CommonProps } from "../component/Layout";
+import Layout, { UserProps } from "../component/Layout";
 import { login } from "../utils/auth";
 import { useRouter } from "next/dist/client/router";
 import nookies from "nookies";
@@ -49,7 +49,7 @@ interface Props {
   userName: string;
 }
 
-const Dashboard = ({ user }: CommonProps) => {
+const Dashboard = ({ user }: UserProps) => {
   const [pjtList, setPjtList] = useState([] as any[]);
   const [isNew, setIsNew] = useState(false);
   const getList = async () => {

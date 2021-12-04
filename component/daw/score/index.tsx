@@ -1,6 +1,7 @@
+import { getDoc, updateDoc } from "@firebase/firestore";
 import React, { useContext, useRef, useState } from "react";
 import { DawContext, ProjectProp } from "..";
-import { Track } from "../../../firebase/model";
+import { getFocusColRef, getFocusDocRef, Track } from "../../../firebase/model";
 
 const TrackCtl: React.FC<ChannelProps> = (props) => {
   const [init, setInit] = useState(0);
@@ -28,11 +29,16 @@ interface ChannelProps {
 }
 
 const Channel: React.FC<ChannelProps> = (props) => {
+  const { projectRef, user } = useContext(DawContext);
   const [height, setHeight] = useState(80);
   const focuser = useRef<HTMLInputElement>(null);
-  const focus = () => {
+  const focus = async () => {
     if (focuser.current) {
       focuser.current.checked = true;
+      const docRef = getFocusDocRef(getFocusColRef(projectRef), user.uid);
+      updateDoc(docRef, {
+        target: "aa",
+      });
     }
   };
   const mouseDown = (e: React.MouseEvent) => {

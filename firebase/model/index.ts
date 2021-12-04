@@ -85,6 +85,8 @@ export const getProjectDocRef = (colRef: CollectionReference<Project>, id: strin
   return doc(colRef, id);
 };
 
-export const getTracksColRef = (docRef: DocumentReference<Project>) => {
-  return collection(docRef, "tracks").withConverter(dynamicConverter(Track));
-};
+export const getTracksColRef = (docRef: DocumentReference<Project>) => collection(docRef, "tracks").withConverter(dynamicConverter(Track));
+
+export const getFocusColRef = (docRef: DocumentReference<Project>) => collection(docRef, "focus").withConverter(dynamicConverter(Focus));
+
+export const getFocusDocRef = (colRef: CollectionReference<Focus>, uid: string) => doc(colRef, uid);

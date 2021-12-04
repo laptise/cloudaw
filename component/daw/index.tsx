@@ -8,12 +8,13 @@ import Score from "./score";
 import AddNewTrackModal from "./modal/addNewTrack";
 import { doc, DocumentReference, getDoc, getFirestore, onSnapshot } from "@firebase/firestore";
 import { FireBase } from "../../firebase";
+import { UserProps } from "../Layout";
 
-export interface ProjectProp {
+export interface ProjectProp extends UserProps {
   project: Project;
 }
 
-interface DawContext {
+interface DawContext extends UserProps {
   projectState: [Project, (val: Project) => void];
   tracksState: [Track[], (val: Track[]) => void];
   addNewModalViewState: [boolean, (value: boolean) => void];
@@ -26,7 +27,7 @@ const dawContextinit = {
 
 export const DawContext = createContext<DawContext>(null as any);
 
-const Daw: React.FC<ProjectProp> = ({ project }) => {
+const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const projectState = useState(project);
   const addNewModalViewState = useState(false);
   const tracksState = useState([] as Track[]);
@@ -56,7 +57,7 @@ const Daw: React.FC<ProjectProp> = ({ project }) => {
         <title>{project.name}</title>
       </Head>
       <DawContext.Provider
-        value={{ addNewModalViewState, tracksState, projectState, projectRef: getProjectDocRef(getProjectsColRef(), project.id as string) }}
+        value={{ addNewModalViewState, user, tracksState, projectState, projectRef: getProjectDocRef(getProjectsColRef(), project.id as string) }}
       >
         <div id="daw">
           <AddNewTrackModal />

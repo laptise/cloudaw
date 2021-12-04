@@ -1,5 +1,5 @@
 import { GetServerSideProps, NextPage } from "next";
-import Layout, { CommonProps } from "../component/Layout";
+import Layout, { UserProps } from "../component/Layout";
 import nookies from "nookies";
 import { firebaseAdmin } from "../back/firebaseAdmin";
 import { FormEvent, useState } from "react";
@@ -8,7 +8,7 @@ import { updateProfile } from "@firebase/auth";
 import { UserRecord } from "firebase-admin/lib/auth/user-record";
 import { toObject } from "../utils";
 
-interface Props extends CommonProps {
+interface Props extends UserProps {
   user: UserRecord;
 }
 const Profile: NextPage<Props> = ({ user }) => {

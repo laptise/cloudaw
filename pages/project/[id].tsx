@@ -4,15 +4,15 @@ import { useRouter } from "next/dist/client/router";
 import { getUserFromSession } from "../../back/auth";
 import { firebaseAdmin } from "../../back/firebaseAdmin";
 import Daw, { ProjectProp } from "../../component/daw";
-import Layout, { CommonProps } from "../../component/Layout";
+import Layout, { UserProps } from "../../component/Layout";
 import { dynamicConverter, Project as projectEntity, ProjectConverter, Track } from "../../firebase/model";
 import { toObject } from "../../utils";
 
-interface Props extends CommonProps, ProjectProp {}
+interface Props extends UserProps, ProjectProp {}
 const Project: NextPage<Props> = ({ user, project }) => {
   return (
     <Layout user={user}>
-      <Daw project={project} />
+      <Daw project={project} user={user} />
     </Layout>
   );
 };
