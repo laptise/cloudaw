@@ -120,6 +120,11 @@ button {
 }
 
 [data-component="modal"] {
+  form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
   position: absolute;
   display: none;
   flex-direction: column;
