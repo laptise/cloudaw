@@ -2,7 +2,7 @@ import { channel } from "diagnostics_channel";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { FlexRow } from "../flexBox";
 import Head from "next/head";
-import { getProjectColRef, getProjectDocRef, getTrackRef, Project, Track } from "../../firebase/model";
+import { getProjectsColRef, getProjectDocRef, getTracksColRef, Project, Track } from "../../firebase/model";
 import TopPannel from "./topPannel";
 import Score from "./score";
 import AddNewTrackModal from "./modal/addNewTrack";
@@ -32,9 +32,9 @@ const Daw: React.FC<ProjectProp> = ({ project }) => {
   const tracksState = useState([] as Track[]);
   const context = useContext(DawContext);
   const attach = async () => {
-    const projectColRef = getProjectColRef();
+    const projectColRef = getProjectsColRef();
     const projectRef = doc(projectColRef, project.id as string);
-    const tracksColRef = getTrackRef(projectRef);
+    const tracksColRef = getTracksColRef(projectRef);
     onSnapshot(projectRef, (doc) => {
       const [pjt, setPjt] = projectState;
       const data = doc.data();
@@ -56,7 +56,7 @@ const Daw: React.FC<ProjectProp> = ({ project }) => {
         <title>{project.name}</title>
       </Head>
       <DawContext.Provider
-        value={{ addNewModalViewState, tracksState, projectState, projectRef: getProjectDocRef(getProjectColRef(), project.id as string) }}
+        value={{ addNewModalViewState, tracksState, projectState, projectRef: getProjectDocRef(getProjectsColRef(), project.id as string) }}
       >
         <div id="daw">
           <AddNewTrackModal />

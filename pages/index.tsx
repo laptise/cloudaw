@@ -10,7 +10,7 @@ import Link from "next/link";
 import { firebaseAdmin } from "../back/firebaseAdmin";
 import { getUserFromSession } from "../back/auth";
 import { toObject } from "../utils";
-import { clone, getProjectColRef, Project } from "../firebase/model";
+import { clone, getProjectsColRef, Project } from "../firebase/model";
 interface PjtProps {
   pjtList: Project[];
   setPjtList(list: Project[]): void;
@@ -32,7 +32,7 @@ const NewProject: React.FC<PjtProps> = ({ pjtList, setPjtList }) => {
   const [pjtNm, setPjtNm] = useState("");
   const addNewProject = async () => {
     const uid = getAuth().currentUser?.uid as string;
-    const projectRef = await getProjectColRef();
+    const projectRef = await getProjectsColRef();
     const newProject = (() => {
       const newPjt = new Project();
       newPjt.owner = uid;
@@ -60,7 +60,7 @@ const Dashboard = ({ user }: CommonProps) => {
   const [isNew, setIsNew] = useState(false);
   const getList = async () => {
     FireBase.init();
-    const pjtRef = getProjectColRef();
+    const pjtRef = getProjectsColRef();
     const { uid } = user;
     if (uid) {
       const q = query(pjtRef, where("owner", "==", uid));

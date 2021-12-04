@@ -1,7 +1,7 @@
 import { addDoc } from "@firebase/firestore";
 import React, { useContext, useState } from "react";
 import { DawContext } from "..";
-import { getTrackRef, Track } from "../../../firebase/model";
+import { getTracksColRef, Track } from "../../../firebase/model";
 import Modal from "../../modal";
 
 interface Props {}
@@ -17,7 +17,7 @@ const AddNewTrackModal: React.FC<Props> = () => {
       item.name = trackNm;
       return item;
     })();
-    await addDoc(getTrackRef(projectRef), newTrack);
+    await addDoc(getTracksColRef(projectRef), newTrack);
   };
   return (
     <Modal title={"新規トラック追加"} id="AddNewTrackModal" viewState={addNewModalViewState}>

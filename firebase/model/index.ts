@@ -1,17 +1,6 @@
-import {
-  collection,
-  CollectionReference,
-  doc,
-  DocumentData,
-  DocumentReference,
-  FirestoreDataConverter,
-  getFirestore,
-  QueryDocumentSnapshot,
-  SnapshotOptions,
-  WithFieldValue,
-} from "firebase/firestore";
-import { FireBase } from ".";
-import { toObject } from "../utils";
+import { collection, CollectionReference, doc, DocumentReference, FirestoreDataConverter } from "firebase/firestore";
+import { FireBase } from "..";
+import { toObject } from "../../utils";
 
 export function clone(src: any, target: any) {
   for (const [key] of Object.entries(src)) {
@@ -52,6 +41,10 @@ export class Track extends BaseEntity {
   name!: string;
 }
 
+export class Focus extends BaseEntity {
+  target!: string;
+}
+
 export class Project extends BaseEntity {
   trackList!: Track[];
   owner!: string;
@@ -83,7 +76,7 @@ export const ProjectConverter: FirestoreDataConverter<Project> = {
   },
 };
 
-export const getProjectColRef = () => {
+export const getProjectsColRef = () => {
   const db = FireBase.fireStore();
   return collection(db, "project").withConverter(ProjectConverter);
 };
@@ -92,6 +85,6 @@ export const getProjectDocRef = (colRef: CollectionReference<Project>, id: strin
   return doc(colRef, id);
 };
 
-export const getTrackRef = (docRef: DocumentReference<Project>) => {
+export const getTracksColRef = (docRef: DocumentReference<Project>) => {
   return collection(docRef, "tracks").withConverter(dynamicConverter(Track));
 };

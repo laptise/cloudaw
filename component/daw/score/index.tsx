@@ -31,7 +31,9 @@ const Channel: React.FC<ChannelProps> = (props) => {
   const [height, setHeight] = useState(80);
   const focuser = useRef<HTMLInputElement>(null);
   const focus = () => {
-    if (focuser.current) focuser.current.checked = true;
+    if (focuser.current) {
+      focuser.current.checked = true;
+    }
   };
   const mouseDown = (e: React.MouseEvent) => {
     const startY = e.clientY;
