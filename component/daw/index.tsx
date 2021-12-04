@@ -1,11 +1,12 @@
 import { channel } from "diagnostics_channel";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { FlexRow } from "../flexBox";
 import Head from "next/head";
 import { Project, Track } from "../../firebase/model";
 import TopPannel from "./topPannel";
 import Score from "./score";
 import AddNewTrackModal from "./modal/addNewTrack";
+import { getFirestore } from "@firebase/firestore";
 
 export interface ProjectProp {
   project: Project;
@@ -24,6 +25,9 @@ export const DawContext = createContext<DawContext>(null as any);
 const Daw: React.FC<ProjectProp> = ({ project }) => {
   const context = useContext(DawContext);
   const addNewModalViewState = useState(false);
+  useEffect(() => {
+    console.log("started");
+  }, []);
   return (
     <>
       <Head>

@@ -11,7 +11,9 @@ const Modal: React.FC<Props> = (props) => {
   const [viewOn, setViewon] = props.viewState;
   const [left, setLeft] = useState(100);
   const [top, setTop] = useState(100);
-  const attr = { ...props, ...{ title: undefined } };
+  const attr = { ...props, ...{ title: undefined, viewState: undefined } };
+  delete attr.viewState;
+  delete attr.title;
   const dragStart = (e: React.MouseEvent) => {
     const picked = e.nativeEvent.target as HTMLElement;
     if (picked.closest("button")) return;
