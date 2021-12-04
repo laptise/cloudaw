@@ -1,4 +1,10 @@
 #daw {
+  input.focusChecker[type="radio"] {
+    display: none;
+  }
+  input.focusChecker[type="radio"]:checked + .focusTarget {
+    filter: brightness(0.8);
+  }
   #AddNewTrackModal {
     width: 200px;
     top: 10px;

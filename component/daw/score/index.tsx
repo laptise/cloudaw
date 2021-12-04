@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { DawContext, ProjectProp } from "..";
 import { Track } from "../../../firebase/model";
 
@@ -29,6 +29,10 @@ interface ChannelProps {
 
 const Channel: React.FC<ChannelProps> = (props) => {
   const [height, setHeight] = useState(80);
+  const focuser = useRef<HTMLInputElement>(null);
+  const focus = () => {
+    if (focuser.current) focuser.current.checked = true;
+  };
   const mouseDown = (e: React.MouseEvent) => {
     const startY = e.clientY;
     document.onmousemove = (e) => {
@@ -37,11 +41,14 @@ const Channel: React.FC<ChannelProps> = (props) => {
     };
   };
   return (
-    <div className="channel" style={{ height }}>
-      <TrackCtl {...props} />
-      <div className="board"></div>
-      <div className="resizeBar bottom" onMouseDown={mouseDown}></div>
-    </div>
+    <>
+      <input type="radio" className="focusChecker" name={`focusFor1`} ref={focuser} />
+      <div onClick={focus} className="channel focusTarget" style={{ height }}>
+        <TrackCtl {...props} />
+        <div className="board"></div>
+        <div className="resizeBar bottom" onMouseDown={mouseDown}></div>
+      </div>
+    </>
   );
 };
 
