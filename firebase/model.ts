@@ -1,4 +1,14 @@
-import { collection, DocumentData, getFirestore, QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
+import {
+  collection,
+  DocumentData,
+  FirestoreDataConverter,
+  getFirestore,
+  QueryDocumentSnapshot,
+  SnapshotOptions,
+  WithFieldValue,
+} from "firebase/firestore";
+import { FireBase } from ".";
+import { toObject } from "../utils";
 
 export function clone(src: any, target: any) {
   for (const [key] of Object.entries(src)) {
@@ -23,40 +33,41 @@ function isJsonTime(value: any) {
   return isString && lengthSafe && spliterSafe;
 }
 
-// function setValue(ref: any, props: [any, any]) {
-//   const [key, value] = props;
-//   if (Array.isArray(value)) {
-//     ref[key] = new Array(value.length);
-//     ref[key].forEach((newRef: any) => setValue(newRef, [key, value[key]]));
-//   } else if (typeof value === "object") {
-//     ref[key] = {};
-//     setObject(ref[key], value[key]);
-//   } else if (isJsonTime(value)) ref[key] = new Date(value) as any;
-//   else (ref as any)[key] = value;
-// }
-
-// export function setObject(ref: any, from: object) {
-//   for (const props of Object.entries(from)) {
-//     setValue(ref, props);
-//   }
-// }
-
-export class Project {
-  constructor(data: object) {
-    if (arguments.length === 1) {
-      clone(data, this);
+export class BaseEntity {
+  /**docId */
+  id?: string;
+  constructor(data?: object) {
+    switch (arguments.length) {
+      case 1:
+        clone(data, this);
+        break;
     }
   }
 }
 
-const ProjectCvt = {
-  toFirestore(post: Project): DocumentData {
-    return {};
+export class Track extends BaseEntity {
+  name!: string;
+}
+
+export class Project extends BaseEntity {
+  trackList!: Track[];
+  owner!: string;
+  name!: string;
+  createdAt!: Date;
+  updatedAt!: Date;
+}
+
+export const ProjectConverter: FirestoreDataConverter<Project> = {
+  toFirestore(post) {
+    return { ...toObject(post) };
   },
-  fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions): Project {
+  fromFirestore(snapshot, options) {
     const data = snapshot.data(options)!;
     return new Project(data);
   },
 };
 
-const projectRef = collection(getFirestore(), "project").withConverter(ProjectCvt);
+export const getProjectRef = async () => {
+  const db = await FireBase.fireStore();
+  return collection(db, "project").withConverter(ProjectConverter);
+};

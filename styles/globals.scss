@@ -3,6 +3,7 @@ body {
   padding: 0;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  background-color: #ccc;
 }
 
 a {
@@ -13,6 +14,7 @@ a {
 * {
   box-sizing: border-box;
   user-select: none;
+  font-size: 14px;
 }
 
 div[data-component="flexCol"] {
@@ -30,40 +32,61 @@ div[data-component="flexRow"] {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  background-color: white;
+  width: 80%;
+  margin: auto;
   &.notLoggedIn {
     filter: blur(1px);
   }
-}
-
-.window {
-  border-radius: 5px;
-  padding: 5px;
-  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
   .header {
     border-bottom: 1px solid #ccc;
+    padding: 5px;
+    font-size: 14px;
   }
   .body {
+    width: 100%;
     &.content {
-      width: calc(100vw - 120px);
       min-height: 200px;
-      padding: 5px;
+      width: 100%;
       align-self: flex-start;
       justify-content: flex-start;
-      gap: 10px;
       .modeSelect {
+        padding: 10px;
         min-width: 160px;
         background: rgb(150, 150, 150);
         background: linear-gradient(333deg, rgba(150, 150, 150, 1) 0%, rgba(236, 236, 236, 1) 100%);
       }
+      #selectProject {
+        padding: 10px;
+      }
       #settingForNew {
+        padding: 10px;
         width: 100%;
         button {
           margin-top: auto;
           margin-left: auto;
         }
       }
+      .singleProject {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        transition: all 100ms;
+        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
+        }
+      }
     }
   }
+}
+
+.window {
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  width: 100%;
 }
 main {
   display: flex;
@@ -93,6 +116,30 @@ button {
   transition: all 30ms;
   &:active {
     transform: translateY(2px);
+  }
+}
+
+[data-component="modal"] {
+  position: absolute;
+  display: none;
+  flex-direction: column;
+  z-index: 2;
+  border-radius: 5px;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  .modalTitle {
+    width: 100%;
+    background-color: #5072a7;
+    padding: 5px;
+    font-size: 14px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  &[data-view="true"] {
+    display: flex;
   }
 }
 @import "profile";

@@ -3,40 +3,46 @@ import React, { createContext, useEffect, useState } from "react";
 import { FlexCol, FlexRow } from "../component/flexBox";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { FireBase } from "../firebase";
-import { collection, doc, setDoc, query, where, getDocs, addDoc, getFirestore } from "firebase/firestore";
+import { collection, doc, setDoc, query, where, getDocs, addDoc, getFirestore, onSnapshot } from "firebase/firestore";
 import Layout, { CommonProps } from "../component/Layout";
 import nookies from "nookies";
 import Link from "next/link";
 import { firebaseAdmin } from "../back/firebaseAdmin";
 import { getUserFromSession } from "../back/auth";
 import { toObject } from "../utils";
-import { clone } from "../firebase/model";
+import { clone, getProjectRef, Project } from "../firebase/model";
 interface PjtProps {
-  pjtList: any[];
+  pjtList: Project[];
+  setPjtList(list: Project[]): void;
 }
 
-const SelectProject = ({ pjtList }: PjtProps) => {
+const SelectProject: React.FC<PjtProps> = ({ pjtList }) => {
   return (
-    <FlexCol>
+    <FlexCol id="selectProject" style={{ width: "100%" }}>
       {pjtList.map((pjt, index) => (
         <Link href={`/project/${pjt.id}`} passHref key={index}>
-          <span>{pjt["name"]}</span>
+          <div className="singleProject">{pjt["name"]}</div>
         </Link>
       ))}
     </FlexCol>
   );
 };
 
-const NewProject = () => {
+const NewProject: React.FC<PjtProps> = ({ pjtList, setPjtList }) => {
   const [pjtNm, setPjtNm] = useState("");
   const addNewProject = async () => {
-    const db = await FireBase.fireStore();
-    const docRef = collection(db, "project");
     const uid = getAuth().currentUser?.uid as string;
-    await addDoc(docRef, {
-      owner: uid,
-      name: pjtNm,
-    });
+    const projectRef = await getProjectRef();
+    const newProject = (() => {
+      const newPjt = new Project();
+      newPjt.owner = uid;
+      newPjt.name = pjtNm;
+      newPjt.trackList = [];
+      return newPjt;
+    })();
+    newProject.id = await addDoc(projectRef, newProject).then((ref) => ref.id);
+
+    setPjtList([...pjtList, newProject]);
   };
   return (
     <FlexCol id="settingForNew">
@@ -54,10 +60,8 @@ const Dashboard = ({ user }: CommonProps) => {
   const [isNew, setIsNew] = useState(false);
   const getList = async () => {
     await FireBase.init();
-    const db = getFirestore();
-    const pjtRef = collection(db, "project");
+    const pjtRef = await getProjectRef();
     const { uid } = user;
-    console.log(uid);
     if (uid) {
       const q = query(pjtRef, where("owner", "==", uid));
       const res = await getDocs(q)
@@ -87,7 +91,7 @@ const Dashboard = ({ user }: CommonProps) => {
               <button onClick={() => setIsNew(false)}>既存のプロジェクト</button>
               <button onClick={() => setIsNew(true)}>新規のプロジェクト</button>
             </FlexCol>
-            {isNew ? <NewProject /> : <SelectProject pjtList={pjtList} />}
+            {isNew ? <NewProject setPjtList={setPjtList} pjtList={pjtList} /> : <SelectProject setPjtList={setPjtList} pjtList={pjtList} />}
           </FlexRow>
         </FlexCol>
       </div>

@@ -2,32 +2,36 @@ import { GetServerSideProps, NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import { getUserFromSession } from "../../back/auth";
 import { firebaseAdmin } from "../../back/firebaseAdmin";
-import Daw from "../../component/daw";
+import Daw, { ProjectProp } from "../../component/daw";
 import Layout, { CommonProps } from "../../component/Layout";
+import { Project as projectEntity, ProjectConverter } from "../../firebase/model";
 import { toObject } from "../../utils";
 
-interface Props extends CommonProps {
-  name: string;
-}
-const Project: NextPage<Props> = ({ user, name }) => {
+interface Props extends CommonProps, ProjectProp {}
+const Project: NextPage<Props> = ({ user, project }) => {
   return (
     <Layout user={user}>
-      <Daw name={name} />
+      <Daw project={project} />
     </Layout>
   );
 };
 
 // This gets called on every request
-export const getServerSideProps: GetServerSideProps<CommonProps> = async (ctx) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const { id } = ctx.query;
-  const data = await firebaseAdmin
+  const project = await firebaseAdmin
     .firestore()
     .collection("project")
+    .withConverter(ProjectConverter as any)
     .doc(id as string)
     .get()
-    .then((data) => data.data());
+    .then((data) => {
+      const doc = data.data() as projectEntity;
+      doc.id = data.id;
+      return doc;
+    });
   const user = await getUserFromSession(ctx);
-  if (user && data) return { props: { user: toObject(user), name: data.name } };
+  if (user && project) return { props: { user: toObject(user), project: toObject(project) } };
   else {
     return {
       redirect: {
