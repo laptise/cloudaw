@@ -2,8 +2,9 @@ import React, { useContext, useState } from "react";
 import { DawContext, ProjectProp } from "..";
 import { Track } from "../../../firebase/model";
 
-const TrackCtl: React.FC<ChannelProps> = ({ width, setWidth }) => {
+const TrackCtl: React.FC<ChannelProps> = (props) => {
   const [init, setInit] = useState(0);
+  const { width, setWidth, track } = props;
   const startWidth = width;
   const mouseDown = (e: React.MouseEvent) => {
     const startX = e.clientX;
@@ -14,7 +15,7 @@ const TrackCtl: React.FC<ChannelProps> = ({ width, setWidth }) => {
   };
   return (
     <div className="ctl" style={{ width: startWidth }}>
-      {name}
+      {track.name}
       <div className="resizeBar right" onMouseDown={mouseDown}></div>
     </div>
   );
@@ -44,7 +45,7 @@ const Channel: React.FC<ChannelProps> = (props) => {
   );
 };
 
-const ScoreTool: React.FC<ProjectProp> = (props) => {
+const ScoreTool: React.FC = (props) => {
   const context = useContext(DawContext);
   const [view, setView] = context.addNewModalViewState;
   return (
@@ -54,8 +55,9 @@ const ScoreTool: React.FC<ProjectProp> = (props) => {
   );
 };
 
-const Score: React.FC<ProjectProp> = (props) => {
-  const { project } = props;
+const Score: React.FC = (props) => {
+  const { projectState } = useContext(DawContext);
+  const [project] = projectState;
   const { trackList } = project;
   const [ctlWidth, setCtlWidth] = useState(200);
 

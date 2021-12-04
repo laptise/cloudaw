@@ -1,6 +1,7 @@
 import {
   collection,
   DocumentData,
+  DocumentReference,
   FirestoreDataConverter,
   getFirestore,
   QueryDocumentSnapshot,
@@ -57,6 +58,19 @@ export class Project extends BaseEntity {
   updatedAt!: Date;
 }
 
+export function dynamicConverter<T extends object>(constructor: new (data?: object) => T) {
+  const converter: FirestoreDataConverter<T> = {
+    toFirestore(data) {
+      return { ...toObject(data) };
+    },
+    fromFirestore(snapshot, options) {
+      const data = snapshot.data(options)!;
+      return new constructor(data);
+    },
+  };
+  return converter;
+}
+
 export const ProjectConverter: FirestoreDataConverter<Project> = {
   toFirestore(post) {
     return { ...toObject(post) };
@@ -67,7 +81,11 @@ export const ProjectConverter: FirestoreDataConverter<Project> = {
   },
 };
 
-export const getProjectRef = async () => {
-  const db = await FireBase.fireStore();
+export const getProjectRef = () => {
+  const db = FireBase.fireStore();
   return collection(db, "project").withConverter(ProjectConverter);
+};
+
+export const getTrackRef = (docRef: DocumentReference<Project>) => {
+  return collection(docRef, "tracks");
 };

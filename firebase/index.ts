@@ -17,23 +17,22 @@ const firebaseConfig = {
 };
 
 export namespace FireBase {
-  export async function init() {
+  export function init() {
     try {
       return getApp();
     } catch {
       const app = initializeApp(firebaseConfig);
-      const auth = getAuth();
-      await setPersistence(auth, browserLocalPersistence);
+      // const auth = getAuth();
+      // await setPersistence(auth, browserLocalPersistence);
       return app;
     }
   }
-  export async function auth() {
-    console.log(firebaseConfig);
-    await init();
+  export function auth() {
+    init();
     return getAuth();
   }
-  export async function fireStore() {
-    await init();
+  export function fireStore() {
+    init();
     return getFirestore();
   }
 }
