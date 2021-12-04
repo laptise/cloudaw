@@ -3,13 +3,14 @@ import React, { createContext, useEffect, useState } from "react";
 import { FlexCol, FlexRow } from "../component/flexBox";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { FireBase } from "../firebase";
-import { collection, doc, setDoc, query, where, getDocs } from "firebase/firestore";
+import { collection, doc, setDoc, query, where, getDocs, addDoc, getFirestore } from "firebase/firestore";
 import Layout, { CommonProps } from "../component/Layout";
 import nookies from "nookies";
 import Link from "next/link";
 import { firebaseAdmin } from "../back/firebaseAdmin";
 import { getUserFromSession } from "../back/auth";
 import { toObject } from "../utils";
+import { clone } from "../firebase/model";
 interface PjtProps {
   pjtList: any[];
 }
@@ -30,9 +31,9 @@ const NewProject = () => {
   const [pjtNm, setPjtNm] = useState("");
   const addNewProject = async () => {
     const db = await FireBase.fireStore();
-    const docRef = doc(db, "project", pjtNm);
+    const docRef = collection(db, "project");
     const uid = getAuth().currentUser?.uid as string;
-    await setDoc(docRef, {
+    await addDoc(docRef, {
       owner: uid,
       name: pjtNm,
     });
@@ -52,20 +53,24 @@ const Dashboard = ({ user }: CommonProps) => {
   const [pjtList, setPjtList] = useState([] as any[]);
   const [isNew, setIsNew] = useState(false);
   const getList = async () => {
-    const db = await FireBase.fireStore();
+    await FireBase.init();
+    const db = getFirestore();
     const pjtRef = collection(db, "project");
-    const uid = getAuth().currentUser?.uid as string;
-    const q = query(pjtRef, where("owner", "==", uid));
-    const res = await getDocs(q)
-      .then((res) => res.docs)
-      .then((docs) =>
-        docs.map((x) => {
-          const data = x.data();
-          data.id = x.id;
-          return data;
-        })
-      );
-    setPjtList(res);
+    const { uid } = user;
+    console.log(uid);
+    if (uid) {
+      const q = query(pjtRef, where("owner", "==", uid));
+      const res = await getDocs(q)
+        .then((res) => res.docs)
+        .then((docs) =>
+          docs.map((x) => {
+            const data = x.data();
+            data.id = x.id;
+            return data;
+          })
+        );
+      setPjtList(res);
+    }
   };
   useEffect(() => {
     getList();
