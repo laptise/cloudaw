@@ -4,7 +4,7 @@ import React, { HTMLAttributes, useState } from "react";
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   chidren?: React.Component;
-  viewState: [boolean, (value: boolean) => void];
+  viewState: State<boolean>;
   title: string;
 }
 const Modal: React.FC<Props> = (props) => {

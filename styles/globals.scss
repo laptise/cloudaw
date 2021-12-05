@@ -11,7 +11,7 @@ a {
   text-decoration: none;
 }
 
-* {
+*:not(input) {
   box-sizing: border-box;
   user-select: none;
   font-size: 14px;

@@ -1,4 +1,3 @@
-import { channel } from "diagnostics_channel";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { FlexRow } from "../flexBox";
 import Head from "next/head";
@@ -6,31 +5,70 @@ import { getProjectsColRef, getProjectDocRef, getTracksColRef, Project, Track } 
 import TopPannel from "./topPannel";
 import Score from "./score";
 import AddNewTrackModal from "./modal/addNewTrack";
-import { doc, DocumentReference, getDoc, getFirestore, onSnapshot } from "@firebase/firestore";
-import { FireBase } from "../../firebase";
-import { UserProps } from "../Layout";
-
+import { doc, DocumentReference, onSnapshot, QueryDocumentSnapshot } from "@firebase/firestore";
+import Layout, { UserProps } from "../Layout";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCog, faHome } from "@fortawesome/free-solid-svg-icons";
+import SettingModal from "./modal/setting";
+import Link from "next/link";
 export interface ProjectProp extends UserProps {
   project: Project;
 }
 
 interface DawContext extends UserProps {
-  projectState: [Project, (val: Project) => void];
-  tracksState: [Track[], (val: Track[]) => void];
-  addNewModalViewState: [boolean, (value: boolean) => void];
+  projectState: State<Project>;
+  tracksState: State<QueryDocumentSnapshot<Track>[]>;
   projectRef: DocumentReference<Project>;
 }
 
-const dawContextinit = {
-  viewAddNewTrackModal: false,
-};
+interface ModalViewContext {
+  settingModalViewState: State<boolean>;
+  newTrackModalViewState: State<boolean>;
+}
 
 export const DawContext = createContext<DawContext>(null as any);
+export const ModalViewContext = createContext<ModalViewContext>(null as any);
+const keyPair: any = {};
 
 const Daw: React.FC<ProjectProp> = ({ project, user }) => {
+  const { settingModalViewState } = useContext(ModalViewContext);
+  const [settingModalView, setSettingModalView] = settingModalViewState;
+  return (
+    <>
+      <AddNewTrackModal />
+      <SettingModal />
+      <header>
+        <div style={{ display: "flex", gap: 5 }}>
+          <Link href="/" passHref>
+            <button>
+              <FontAwesomeIcon icon={faHome} />
+            </button>
+          </Link>
+          <span>|</span>
+          {project.name}
+        </div>
+        <button onClick={() => setSettingModalView(true)}>
+          <FontAwesomeIcon icon={faCog} />
+        </button>
+      </header>
+      <Head>
+        <title>{project.name}</title>
+      </Head>
+      <div id="playBackCtl"></div>
+      <FlexRow className="centerRow">
+        <TopPannel />
+        <Score />
+      </FlexRow>
+    </>
+  );
+};
+
+const DawProvider: React.FC<ProjectProp> = (props) => {
+  const { project, user } = props;
   const projectState = useState(project);
-  const addNewModalViewState = useState(false);
-  const tracksState = useState([] as Track[]);
+  const newTrackModalViewState = useState(false);
+  const tracksState = useState([] as QueryDocumentSnapshot<Track>[]);
+  const settingModalViewState = useState(false);
   const context = useContext(DawContext);
   const attach = async () => {
     const projectColRef = getProjectsColRef();
@@ -43,33 +81,28 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
     });
     onSnapshot(tracksColRef, (snapshot) => {
       const [val, setVal] = tracksState;
-      const tracks = snapshot.docs.map((x) => x.data());
+      const tracks = snapshot.docs;
       setVal(tracks);
       console.log(tracks);
     });
   };
+  const keyBind = () => {
+    document.onkeydown = (e) => (keyPair[e.key] = true);
+    document.onkeyup = (e) => (keyPair[e.key] = false);
+  };
   useEffect(() => {
     attach();
+    keyBind();
   }, []);
   return (
-    <>
-      <Head>
-        <title>{project.name}</title>
-      </Head>
-      <DawContext.Provider
-        value={{ addNewModalViewState, user, tracksState, projectState, projectRef: getProjectDocRef(getProjectsColRef(), project.id as string) }}
-      >
-        <div id="daw">
-          <AddNewTrackModal />
-          <div id="playBackCtl"></div>
-          <FlexRow className="centerRow">
-            <TopPannel />
-            <Score />
-          </FlexRow>
-        </div>
-      </DawContext.Provider>
-    </>
+    <main id="daw">
+      <ModalViewContext.Provider value={{ settingModalViewState, newTrackModalViewState }}>
+        <DawContext.Provider value={{ user, tracksState, projectState, projectRef: getProjectDocRef(getProjectsColRef(), project.id as string) }}>
+          <Daw {...props} />
+        </DawContext.Provider>
+      </ModalViewContext.Provider>
+    </main>
   );
 };
 
-export default Daw;
+export default DawProvider;

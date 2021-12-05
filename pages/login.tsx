@@ -10,6 +10,7 @@ const Login = () => {
   const loggin = async () => {
     try {
       await login(email, password);
+      console.log("succesd");
       router.push("/");
     } catch {
       alert("no");
@@ -19,9 +20,9 @@ const Login = () => {
   return (
     <FlexCol id="login">
       <label>メールアドレス</label>
-      <input type="email" onInput={(e) => setEmail(e.currentTarget.value)} />
+      <input type="email" onInput={(e) => setEmail(e.currentTarget.value)} value={email} />
       <label>パスワード</label>
-      <input type="password" onInput={(e) => setPassword(e.currentTarget.value)} />
+      <input type="password" onInput={(e) => setPassword(e.currentTarget.value)} value={password} />
       <button onClick={loggin}>ログイン</button>
       <button onClick={logOut}>out</button>
     </FlexCol>

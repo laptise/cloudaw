@@ -51,6 +51,7 @@ export class Project extends BaseEntity {
   name!: string;
   createdAt!: Date;
   updatedAt!: Date;
+  collaborator!: string[];
 }
 
 export function dynamicConverter<T extends object>(constructor: new (data?: object) => T) {

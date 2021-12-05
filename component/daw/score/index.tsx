@@ -1,12 +1,13 @@
-import { getDoc, updateDoc } from "@firebase/firestore";
+import { QueryDocumentSnapshot, updateDoc } from "@firebase/firestore";
 import React, { useContext, useRef, useState } from "react";
-import { DawContext, ProjectProp } from "..";
+import { DawContext, ModalViewContext, ProjectProp } from "..";
 import { getFocusColRef, getFocusDocRef, Track } from "../../../firebase/model";
 
 const TrackCtl: React.FC<ChannelProps> = (props) => {
   const [init, setInit] = useState(0);
   const { width, setWidth, track } = props;
   const startWidth = width;
+  const { name } = track.data();
   const mouseDown = (e: React.MouseEvent) => {
     const startX = e.clientX;
     document.onmousemove = (e) => {
@@ -16,14 +17,14 @@ const TrackCtl: React.FC<ChannelProps> = (props) => {
   };
   return (
     <div className="ctl" style={{ width: startWidth }}>
-      {track.name}
+      {name}
       <div className="resizeBar right" onMouseDown={mouseDown}></div>
     </div>
   );
 };
 
 interface ChannelProps {
-  track: Track;
+  track: QueryDocumentSnapshot<Track>;
   width: number;
   setWidth(width: number): void;
 }
@@ -32,12 +33,13 @@ const Channel: React.FC<ChannelProps> = (props) => {
   const { projectRef, user } = useContext(DawContext);
   const [height, setHeight] = useState(80);
   const focuser = useRef<HTMLInputElement>(null);
+  const { track } = props;
   const focus = async () => {
     if (focuser.current) {
       focuser.current.checked = true;
       const docRef = getFocusDocRef(getFocusColRef(projectRef), user.uid);
       updateDoc(docRef, {
-        target: "aa",
+        target: `track-${focuser.current.id}`,
       });
     }
   };
@@ -50,7 +52,7 @@ const Channel: React.FC<ChannelProps> = (props) => {
   };
   return (
     <>
-      <input type="radio" className="focusChecker" name={`focusFor1`} ref={focuser} />
+      <input type="radio" className="focusChecker" data-doc-type="track" id={track.id} name={`focusFor1`} ref={focuser} />
       <div onClick={focus} className="channel focusTarget" style={{ height }}>
         <TrackCtl {...props} />
         <div className="board"></div>
@@ -61,8 +63,8 @@ const Channel: React.FC<ChannelProps> = (props) => {
 };
 
 const ScoreTool: React.FC = (props) => {
-  const context = useContext(DawContext);
-  const [view, setView] = context.addNewModalViewState;
+  const { newTrackModalViewState } = useContext(ModalViewContext);
+  const [view, setView] = newTrackModalViewState;
   return (
     <div id="scoreTool">
       <button onClick={() => setView(true)}>+</button>

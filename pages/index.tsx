@@ -64,7 +64,7 @@ const Dashboard = ({ user }: UserProps) => {
     const { uid } = user;
     if (uid) {
       const q = query(pjtRef, where("owner", "==", uid));
-      const res = await getDocs(q)
+      const owning = await getDocs(q)
         .then((res) => res.docs)
         .then((docs) =>
           docs.map((x) => {
@@ -73,7 +73,18 @@ const Dashboard = ({ user }: UserProps) => {
             return data;
           })
         );
-      setPjtList(res);
+      const q2 = query(pjtRef, where("collaborator", "array-contains", uid));
+      const coling = await getDocs(q2)
+        .then((res) => res.docs)
+        .then((docs) =>
+          docs.map((x) => {
+            const data = x.data();
+            data.id = x.id;
+            return data;
+          })
+        );
+      console.log(coling);
+      setPjtList([...owning, ...coling]);
     }
   };
   useEffect(() => {
