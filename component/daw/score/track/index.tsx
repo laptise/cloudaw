@@ -1,6 +1,6 @@
-import { doc, updateDoc } from "firebase/firestore";
+import { addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import React, { useContext, useRef, useState } from "react";
-import { getCollabColRef, TrackEntity } from "../../../../firebase/model";
+import { getCollabColRef, getTracksColRef, TrackEntity } from "../../../../firebase/model";
 import { ContextMenuContext, DawContext } from "../../../../pages/project/[id]";
 import TrackCtl from "./ctl";
 
@@ -42,10 +42,27 @@ const Track: React.FC<ChannelProps> = (props) => {
         label: name,
         items: [
           {
-            label: "トラック削除",
+            label: "トラック名編集",
+            shortCut: "↩",
+            disabled: false,
+            async action() {},
+          },
+          {
+            label: "トラック複製",
+            shortCut: "⌘D",
             disabled: false,
             async action() {
-              window.confirm(`${name}を削除しますか？`);
+              addDoc(getTracksColRef(projectRef), track.data());
+            },
+          },
+          {
+            label: "トラック削除",
+            shortCut: "⌘⌫",
+            disabled: false,
+            async action() {
+              if (window.confirm(`${name}を削除しますか？`)) {
+                await deleteDoc(track.ref);
+              }
             },
           },
         ],

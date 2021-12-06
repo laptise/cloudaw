@@ -6,14 +6,32 @@
     box-shadow: 0 0 2px black;
     background-color: rgba(0, 0, 0, 0.6);
     color: white;
-    padding: 5px;
     border-radius: 4px;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     .group {
       display: flex;
       flex-direction: column;
+      .groupTitle {
+        padding: 5px;
+        background-color: rgba(255, 255, 255, 0.35);
+      }
       button {
+        display: flex;
+        width: 100%;
+        font-size: 12px;
+        padding: 5px;
+        align-items: center;
+        justify-content: space-between;
+        box-sizing: border-box;
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+        .shortCut {
+          font-size: 12px;
+          opacity: 0.7;
+        }
       }
     }
   }

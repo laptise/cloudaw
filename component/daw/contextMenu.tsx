@@ -21,7 +21,7 @@ export const ContextMenu = () => {
     <div id="contextMenu" style={{ left, top }}>
       {groups.map((group, index) => (
         <div className="group" key={index}>
-          {group.label ? <span>{group.label}</span> : ""}
+          {group.label ? <span className="groupTitle">{group.label}</span> : ""}
           {group.items.map((item, iIndex) => (
             <button
               onClick={async () => {
@@ -32,6 +32,7 @@ export const ContextMenu = () => {
               key={iIndex}
             >
               {item.label}
+              {item.shortCut && <span className="shortCut">{item.shortCut}</span>}
             </button>
           ))}
         </div>

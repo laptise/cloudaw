@@ -37,6 +37,7 @@ declare global {
     label: string;
     action(): any;
     disabled: boolean;
+    shortCut?: string;
   }
 
   interface ContextGroup {

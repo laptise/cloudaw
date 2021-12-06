@@ -41,6 +41,7 @@ export function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnap
   const img = document.createElement("img");
   img.innerHTML = "#";
   badge.append(img);
+  badge.style.backgroundColor = color;
   const name = document.createElement("span");
   name.className = "name";
   name.innerText = displayName || "unknown";
