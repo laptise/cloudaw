@@ -1,17 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { FlexRow } from "../flexBox";
 import Head from "next/head";
-import {
-  getProjectsColRef,
-  getProjectDocRef,
-  getTracksColRef,
-  Project,
-  Track,
-  getFocusDocRef,
-  getFocusColRef,
-  getCollabColRef,
-  Collaborator,
-} from "../../firebase/model";
 import TopPannel from "./topPannel";
 import Score from "./score";
 import AddNewTrackModal from "./modal/addNewTrack";
@@ -21,11 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faHome } from "@fortawesome/free-solid-svg-icons";
 import SettingModal from "./modal/setting";
 import Link from "next/link";
-import { ModalViewContext } from "../../pages/project/[id]";
-
-export const ContextMenu = () => {
-  return <div id="contextMenu"></div>;
-};
+import { ContextMenuContext, ModalViewContext } from "../../pages/project/[id]";
 
 const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const { settingModalViewState } = useContext(ModalViewContext);

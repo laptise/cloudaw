@@ -10,10 +10,10 @@ import Link from "next/link";
 import { firebaseAdmin } from "../back/firebaseAdmin";
 import { getUserFromSession } from "../back/auth";
 import { toObject } from "../utils";
-import { clone, getProjectsColRef, Project } from "../firebase/model";
+import { clone, getProjectsColRef, ProjectEntity } from "../firebase/model";
 interface PjtProps {
-  pjtList: Project[];
-  setPjtList(list: Project[]): void;
+  pjtList: ProjectEntity[];
+  setPjtList(list: ProjectEntity[]): void;
 }
 
 const SelectProject: React.FC<PjtProps> = ({ pjtList }) => {
@@ -34,7 +34,7 @@ const NewProject: React.FC<PjtProps> = ({ pjtList, setPjtList }) => {
     const uid = getAuth().currentUser?.uid as string;
     const projectRef = await getProjectsColRef();
     const newProject = (() => {
-      const newPjt = new Project();
+      const newPjt = new ProjectEntity();
       newPjt.owner = uid;
       newPjt.name = pjtNm;
       newPjt.trackList = [];

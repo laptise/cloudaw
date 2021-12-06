@@ -4,25 +4,26 @@ import { GetServerSideProps, NextPage } from "next";
 import React, { createContext, useEffect, useState } from "react";
 import { getUserFromSession } from "../../back/auth";
 import { firebaseAdmin } from "../../back/firebaseAdmin";
-import Daw, { ContextMenu } from "../../component/daw";
+import Daw from "../../component/daw";
+import ContextMenu from "../../component/daw/contextMenu";
 import AddNewTrackModal from "../../component/daw/modal/addNewTrack";
 import SettingModal from "../../component/daw/modal/setting";
 import {
-  Collaborator,
+  CollaboratorEntity,
   dynamicConverter,
   getCollabColRef,
   getProjectDocRef,
   getProjectsColRef,
   getTracksColRef,
-  Project as projectEntity,
+  ProjectEntity as projectEntity,
   ProjectConverter,
-  Track,
+  TrackEntity,
 } from "../../firebase/model";
 import { toObject } from "../../utils";
 
 export const ModalViewContext = createContext<ModalViewContext>(null as any);
 export const ContextMenuContext = createContext<ContextMenuContext>(null as any);
-export function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnapshot<Collaborator>) {
+export function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnapshot<CollaboratorEntity>) {
   const { color, displayName } = user.data();
   const exists = document.querySelector(`[data-by="${user.id}"]`);
   exists?.parentElement?.removeChild(exists);
@@ -54,7 +55,9 @@ const Project: NextPage<ProjectProp> = ({ user, project }) => {
   const contextMenuViewState = useState(false);
   const conteextGroupState = useState([] as unknown as ContextGroup[]);
   const projectState = useState(project);
-  const tracksState = useState([] as QueryDocumentSnapshot<Track>[]);
+  const leftState = useState(0);
+  const topState = useState(0);
+  const tracksState = useState([] as QueryDocumentSnapshot<TrackEntity>[]);
   const projectColRef = getProjectsColRef();
   const projectRef = doc(projectColRef, project.id as string);
   const tracksColRef = getTracksColRef(projectRef);
@@ -104,7 +107,9 @@ const Project: NextPage<ProjectProp> = ({ user, project }) => {
     <main id="daw" onContextMenu={(e) => e.preventDefault()}>
       <DawContext.Provider value={{ user, tracksState, projectState, projectRef: getProjectDocRef(getProjectsColRef(), project.id as string) }}>
         <ModalViewContext.Provider value={{ settingModalViewState, newTrackModalViewState }}>
-          <ContextMenuContext.Provider value={{ view: contextMenuViewState, groups: conteextGroupState }}>
+          <ContextMenuContext.Provider
+            value={{ leftState, topState, contextMenuViewState: contextMenuViewState, contextMenuGroupState: conteextGroupState }}
+          >
             <ContextMenu />
             <AddNewTrackModal />
             <SettingModal />
@@ -127,7 +132,7 @@ export const getServerSideProps: GetServerSideProps<ProjectProp> = async (ctx) =
     .get()
     .then(async (data) => {
       const doc = data.data() as projectEntity;
-      const tracksRef = data.ref.collection("tracks").withConverter(dynamicConverter(Track) as any);
+      const tracksRef = data.ref.collection("tracks").withConverter(dynamicConverter(TrackEntity) as any);
       doc.trackList = (await tracksRef.get().then((res) => res.docs.map((x) => x.data()))) as any;
       console.log(doc.trackList);
       doc.id = data.id;

@@ -1,6 +1,6 @@
 import { addDoc } from "@firebase/firestore";
 import React, { useContext, useState } from "react";
-import { getTracksColRef, Track } from "../../../firebase/model";
+import { getTracksColRef, TrackEntity } from "../../../firebase/model";
 import { DawContext, ModalViewContext } from "../../../pages/project/[id]";
 import Modal from "../../modal";
 
@@ -14,7 +14,7 @@ const AddNewTrackModal: React.FC<Props> = () => {
     e.preventDefault();
     setView(false);
     const newTrack = (() => {
-      const item = new Track();
+      const item = new TrackEntity();
       item.name = trackNm;
       return item;
     })();

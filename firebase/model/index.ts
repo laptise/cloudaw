@@ -37,16 +37,16 @@ export class BaseEntity {
   }
 }
 
-export class Track extends BaseEntity {
+export class TrackEntity extends BaseEntity {
   name!: string;
 }
 
-export class Focus extends BaseEntity {
+export class FocusEntity extends BaseEntity {
   target!: string;
 }
 
-export class Project extends BaseEntity {
-  trackList!: Track[];
+export class ProjectEntity extends BaseEntity {
+  trackList!: TrackEntity[];
   owner!: string;
   name!: string;
   createdAt!: Date;
@@ -58,7 +58,7 @@ export class FocusInfo extends BaseEntity {
   target!: string;
 }
 
-export class Collaborator extends BaseEntity {
+export class CollaboratorEntity extends BaseEntity {
   color!: string;
   focusing!: string;
   isOwner!: boolean;
@@ -78,13 +78,13 @@ export function dynamicConverter<T extends object>(constructor: new (data?: obje
   return converter;
 }
 
-export const ProjectConverter: FirestoreDataConverter<Project> = {
+export const ProjectConverter: FirestoreDataConverter<ProjectEntity> = {
   toFirestore(post) {
     return { ...toObject(post) };
   },
   fromFirestore(snapshot, options) {
     const data = snapshot.data(options)!;
-    return new Project(data);
+    return new ProjectEntity(data);
   },
 };
 
@@ -93,17 +93,19 @@ export const getProjectsColRef = () => {
   return collection(db, "project").withConverter(ProjectConverter);
 };
 
-export const getProjectDocRef = (colRef: CollectionReference<Project>, id: string) => {
+export const getProjectDocRef = (colRef: CollectionReference<ProjectEntity>, id: string) => {
   return doc(colRef, id);
 };
 
-export const getFocusInfoColRef = (docRef: DocumentReference<Project>) => collection(docRef, "focus").withConverter(dynamicConverter(FocusInfo));
+export const getFocusInfoColRef = (docRef: DocumentReference<ProjectEntity>) =>
+  collection(docRef, "focus").withConverter(dynamicConverter(FocusInfo));
 
-export const getCollabColRef = (docRef: DocumentReference<Project>) =>
-  collection(docRef, "collaborator").withConverter(dynamicConverter(Collaborator));
+export const getCollabColRef = (docRef: DocumentReference<ProjectEntity>) =>
+  collection(docRef, "collaborator").withConverter(dynamicConverter(CollaboratorEntity));
 
-export const getTracksColRef = (docRef: DocumentReference<Project>) => collection(docRef, "tracks").withConverter(dynamicConverter(Track));
+export const getTracksColRef = (docRef: DocumentReference<ProjectEntity>) =>
+  collection(docRef, "tracks").withConverter(dynamicConverter(TrackEntity));
 
-export const getFocusColRef = (docRef: DocumentReference<Project>) => collection(docRef, "focus").withConverter(dynamicConverter(Focus));
+export const getFocusColRef = (docRef: DocumentReference<ProjectEntity>) => collection(docRef, "focus").withConverter(dynamicConverter(FocusEntity));
 
-export const getFocusDocRef = (colRef: CollectionReference<Focus>, uid: string) => doc(colRef, uid);
+export const getFocusDocRef = (colRef: CollectionReference<FocusEntity>, uid: string) => doc(colRef, uid);
