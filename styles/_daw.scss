@@ -1,18 +1,20 @@
 #daw {
   #contextMenu {
     position: fixed;
-    width: 300px;
-    height: 300px;
+    width: 200px;
     z-index: 4;
-    box-shadow: 0 0 0 3px black;
+    box-shadow: 0 0 2px black;
     background-color: rgba(0, 0, 0, 0.6);
     color: white;
-    border-radius: 10px;
+    padding: 5px;
+    border-radius: 4px;
     display: flex;
     flex-direction: column;
     .group {
       display: flex;
       flex-direction: column;
+      button {
+      }
     }
   }
   header {

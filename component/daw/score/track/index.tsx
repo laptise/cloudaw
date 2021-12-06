@@ -51,7 +51,6 @@ const Track: React.FC<ChannelProps> = (props) => {
       },
     ]);
     setViewContext(true);
-    console.log(e);
   };
   return (
     <>
