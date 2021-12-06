@@ -1,7 +1,8 @@
 import { QueryDocumentSnapshot, updateDoc } from "@firebase/firestore";
+import { doc } from "firebase/firestore";
 import React, { useContext, useRef, useState } from "react";
 import { DawContext, ModalViewContext, ProjectProp } from "..";
-import { getFocusColRef, getFocusDocRef, Track } from "../../../firebase/model";
+import { getCollabColRef, getFocusColRef, getFocusDocRef, Track } from "../../../firebase/model";
 
 const TrackCtl: React.FC<ChannelProps> = (props) => {
   const [init, setInit] = useState(0);
@@ -37,9 +38,10 @@ const Channel: React.FC<ChannelProps> = (props) => {
   const focus = async () => {
     if (focuser.current) {
       focuser.current.checked = true;
-      const docRef = getFocusDocRef(getFocusColRef(projectRef), user.uid);
-      updateDoc(docRef, {
-        target: `track-${focuser.current.id}`,
+      const colRef = getCollabColRef(projectRef);
+      const docRef2 = doc(colRef, user.uid);
+      updateDoc(docRef2, {
+        focusing: `${focuser.current.id}`,
       });
     }
   };
@@ -52,7 +54,7 @@ const Channel: React.FC<ChannelProps> = (props) => {
   };
   return (
     <>
-      <input type="radio" className="focusChecker" data-doc-type="track" id={track.id} name={`focusFor1`} ref={focuser} />
+      <input type="radio" className="focusChecker" data-doc-type="track" id={`track-${track.id}`} name={`focusFor1`} ref={focuser} />
       <div onClick={focus} className="channel focusTarget" style={{ height }}>
         <TrackCtl {...props} />
         <div className="board"></div>

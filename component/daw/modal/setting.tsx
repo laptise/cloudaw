@@ -66,7 +66,6 @@ const SettingModal: React.FC = () => {
   const inviteModalView = useState(false);
   const [inviteView, setIniviteView] = inviteModalView;
   const submit = async (e: React.FormEvent) => {};
-  console.log(pjt.collaborator);
   return (
     <>
       <InviteModal viewState={inviteModalView} />

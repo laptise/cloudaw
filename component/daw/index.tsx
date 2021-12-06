@@ -1,11 +1,21 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { FlexRow } from "../flexBox";
 import Head from "next/head";
-import { getProjectsColRef, getProjectDocRef, getTracksColRef, Project, Track } from "../../firebase/model";
+import {
+  getProjectsColRef,
+  getProjectDocRef,
+  getTracksColRef,
+  Project,
+  Track,
+  getFocusDocRef,
+  getFocusColRef,
+  getCollabColRef,
+  Collaborator,
+} from "../../firebase/model";
 import TopPannel from "./topPannel";
 import Score from "./score";
 import AddNewTrackModal from "./modal/addNewTrack";
-import { doc, DocumentReference, onSnapshot, QueryDocumentSnapshot } from "@firebase/firestore";
+import { doc, DocumentReference, getDocs, onSnapshot, QueryDocumentSnapshot } from "@firebase/firestore";
 import Layout, { UserProps } from "../Layout";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCog, faHome } from "@fortawesome/free-solid-svg-icons";
@@ -63,6 +73,17 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   );
 };
 
+function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnapshot<Collaborator>) {
+  const { color } = user.data();
+  const exists = document.querySelector(`[data-by="${user.id}"]`);
+  exists?.parentElement?.removeChild(exists);
+  const elm = document.createElement("div");
+  elm.className = "focusLabel";
+  elm.style.borderColor = color;
+  elm.dataset.by = user.id;
+  target.nextSibling?.appendChild(elm);
+}
+
 const DawProvider: React.FC<ProjectProp> = (props) => {
   const { project, user } = props;
   const projectState = useState(project);
@@ -74,6 +95,8 @@ const DawProvider: React.FC<ProjectProp> = (props) => {
     const projectColRef = getProjectsColRef();
     const projectRef = doc(projectColRef, project.id as string);
     const tracksColRef = getTracksColRef(projectRef);
+    const focusColRef = getFocusColRef(projectRef);
+    const collabColRef = getCollabColRef(projectRef);
     onSnapshot(projectRef, (doc) => {
       const [pjt, setPjt] = projectState;
       const data = doc.data();
@@ -83,7 +106,14 @@ const DawProvider: React.FC<ProjectProp> = (props) => {
       const [val, setVal] = tracksState;
       const tracks = snapshot.docs;
       setVal(tracks);
-      console.log(tracks);
+    });
+    onSnapshot(collabColRef, (snapshot) => {
+      console.log(snapshot);
+      snapshot.docs.forEach((snapshot) => {
+        const x = snapshot.data();
+        const target = document.querySelector<HTMLInputElement>(`#${x.focusing}`);
+        target && snapshot.id && setFocusTarget(target, snapshot);
+      });
     });
   };
   const keyBind = () => {

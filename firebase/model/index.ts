@@ -54,6 +54,16 @@ export class Project extends BaseEntity {
   collaborator!: string[];
 }
 
+export class FocusInfo extends BaseEntity {
+  target!: string;
+}
+
+export class Collaborator extends BaseEntity {
+  color!: string;
+  focusing!: string;
+  isOwner!: boolean;
+}
+
 export function dynamicConverter<T extends object>(constructor: new (data?: object) => T) {
   const converter: FirestoreDataConverter<T> = {
     toFirestore(data) {
@@ -85,6 +95,11 @@ export const getProjectsColRef = () => {
 export const getProjectDocRef = (colRef: CollectionReference<Project>, id: string) => {
   return doc(colRef, id);
 };
+
+export const getFocusInfoColRef = (docRef: DocumentReference<Project>) => collection(docRef, "focus").withConverter(dynamicConverter(FocusInfo));
+
+export const getCollabColRef = (docRef: DocumentReference<Project>) =>
+  collection(docRef, "collaborator").withConverter(dynamicConverter(Collaborator));
 
 export const getTracksColRef = (docRef: DocumentReference<Project>) => collection(docRef, "tracks").withConverter(dynamicConverter(Track));
 
