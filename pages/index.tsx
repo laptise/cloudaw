@@ -88,6 +88,7 @@ const Dashboard = ({ user }: UserProps) => {
     }
   };
   useEffect(() => {
+    console.log("index");
     getList();
   }, []);
   return (
@@ -112,6 +113,7 @@ const Dashboard = ({ user }: UserProps) => {
 
 // This gets called on every request
 export const getServerSideProps: GetServerSideProps<UserProps> = async (ctx) => {
+  console.log("indexed");
   const user = await getUserFromSession(ctx);
   if (user) return { props: { user: toObject(user) } };
   else {

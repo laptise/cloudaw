@@ -6,7 +6,7 @@ import { FireBase } from "../firebase";
  */
 export const login = async (email: string, password: string) => {
   // FirebaseAuthを取得する
-  const auth = await FireBase.auth();
+  const auth = FireBase.auth();
   // メールアドレスとパスワードでログインする
   const result = await signInWithEmailAndPassword(auth, email, password);
   // セッションIDを作成するためのIDを作成する

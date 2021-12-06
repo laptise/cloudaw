@@ -7,16 +7,23 @@ import { FireBase } from "../firebase";
 import { updateProfile } from "@firebase/auth";
 import { UserRecord } from "firebase-admin/lib/auth/user-record";
 import { toObject } from "../utils";
+import { logout } from "../utils/auth";
+import { useRouter } from "next/dist/client/router";
 
 interface Props extends UserProps {
   user: UserRecord;
 }
 const Profile: NextPage<Props> = ({ user }) => {
+  const router = useRouter();
   const [displayName, setDisplayName] = useState(user.displayName || "");
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const auth = FireBase.auth();
     if (auth.currentUser) updateProfile(auth.currentUser, { displayName });
+  };
+  const logOut = async () => {
+    await logout();
+    router.push("/");
   };
   return (
     <Layout id="profile" user={user}>
@@ -24,6 +31,9 @@ const Profile: NextPage<Props> = ({ user }) => {
         ニックネーム
         <input value={displayName} onInput={(e) => setDisplayName(e.currentTarget.value)} />
         <button type="submit">更新</button>
+        <button onClick={() => logOut()} type="button">
+          ログアウト
+        </button>
       </form>
     </Layout>
   );
