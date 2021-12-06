@@ -5,11 +5,13 @@ import { DawContext, ModalViewContext } from "../../../pages/project/[id]";
 import Modal from "../../modal";
 
 interface Props {}
+/**新規トラック追加モーダル */
 const AddNewTrackModal: React.FC<Props> = () => {
   const { projectRef } = useContext(DawContext);
   const { newTrackModalViewState } = useContext(ModalViewContext);
   const [trackNm, setTrackNm] = useState("");
   const [view, setView] = newTrackModalViewState;
+  /**送信 */
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setView(false);

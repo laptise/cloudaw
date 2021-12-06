@@ -1,6 +1,7 @@
 import { useContext, useEffect } from "react";
 import { ContextMenuContext } from "../../pages/project/[id]";
 
+/**コンテクストメニュー */
 export const ContextMenu = () => {
   const { contextMenuViewState, leftState, topState, contextMenuGroupState } = useContext(ContextMenuContext);
   const [groups] = contextMenuGroupState;

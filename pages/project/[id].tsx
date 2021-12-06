@@ -23,6 +23,7 @@ import { toObject } from "../../utils";
 
 export const ModalViewContext = createContext<ModalViewContext>(null as any);
 export const ContextMenuContext = createContext<ContextMenuContext>(null as any);
+/**他ユーザーのフォーカスを描画 */
 export function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnapshot<CollaboratorEntity>) {
   const { color, displayName } = user.data();
   const exists = document.querySelector(`[data-by="${user.id}"]`);
@@ -62,7 +63,7 @@ const Project: NextPage<ProjectProp> = ({ user, project }) => {
   const projectRef = doc(projectColRef, project.id as string);
   const tracksColRef = getTracksColRef(projectRef);
   const collabColRef = getCollabColRef(projectRef);
-
+  /**スナップショットリスナー追加 */
   const attach = () => {
     onSnapshot(projectRef, (doc) => {
       const [pjt, setPjt] = projectState;
@@ -86,6 +87,7 @@ const Project: NextPage<ProjectProp> = ({ user, project }) => {
         });
     });
   };
+  /**スナップショットリスナー解除 */
   const detach = () => {
     onSnapshot(projectRef, () => {});
     onSnapshot(tracksColRef, () => {});

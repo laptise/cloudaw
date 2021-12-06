@@ -11,6 +11,8 @@ interface UserBadgeProps {
   addThisUser: (user: UserRecord) => void;
   user: UserRecord;
 }
+
+/**ユーザーフォーカスバッジ */
 const UserBadge: React.FC<UserBadgeProps> = ({ user, addThisUser }) => {
   return (
     <FlexCol className="userBadge">
@@ -26,6 +28,7 @@ const UserBadge: React.FC<UserBadgeProps> = ({ user, addThisUser }) => {
 interface Props {
   viewState: State<boolean>;
 }
+/**コラボレーター検索・追加モーダル */
 const InviteModal: React.FC<Props> = ({ viewState }) => {
   const [email, setEmail] = useState("");
   const [isFailed, setIsFailed] = useState(false);
@@ -57,7 +60,7 @@ const InviteModal: React.FC<Props> = ({ viewState }) => {
     </Modal>
   );
 };
-
+/**プロジェクト全体の設定モーダル */
 const SettingModal: React.FC = () => {
   const { projectState } = useContext(DawContext);
   const [pjt] = projectState;
