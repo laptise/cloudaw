@@ -4,7 +4,7 @@ import { FlexCol, FlexRow } from "../component/flexBox";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { FireBase } from "../firebase";
 import { collection, doc, setDoc, query, where, getDocs, addDoc, getFirestore, onSnapshot } from "firebase/firestore";
-import Layout, { UserProps } from "../component/Layout";
+import Layout from "../component/Layout";
 import nookies from "nookies";
 import Link from "next/link";
 import { firebaseAdmin } from "../back/firebaseAdmin";

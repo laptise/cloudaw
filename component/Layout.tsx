@@ -5,9 +5,7 @@ import nookies from "nookies";
 import { UserRecord } from "firebase-admin/lib/auth/user-record";
 import { GetServerSideProps } from "next";
 import { getUserFromSession } from "../back/auth";
-export interface UserProps {
-  user: UserRecord;
-}
+
 interface LayoutProps extends UserProps, React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> {
   children?: ReactElement;
 }

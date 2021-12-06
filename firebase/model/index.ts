@@ -62,6 +62,7 @@ export class Collaborator extends BaseEntity {
   color!: string;
   focusing!: string;
   isOwner!: boolean;
+  displayName!: string;
 }
 
 export function dynamicConverter<T extends object>(constructor: new (data?: object) => T) {

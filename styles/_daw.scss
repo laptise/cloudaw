@@ -14,7 +14,50 @@
     left: 0;
     width: 100%;
     height: 100%;
-    border: 2px solid;
+    .border {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 2px solid;
+    }
+    .badge {
+      position: absolute;
+      background-color: red;
+      left: 0;
+      top: -25px;
+      height: 25px;
+      border-radius: 7.5px 7.5px 0 0;
+      overflow: hidden;
+      max-width: 25px;
+      min-width: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      transition: max-width 1000ms;
+      .name {
+        display: none;
+        margin-right: 5px;
+        font-size: 11px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      &:hover {
+        max-width: 300px;
+        width: initial;
+        .name {
+          display: inline;
+          color: white;
+        }
+      }
+      img {
+        margin: 2.5px;
+        width: 20px;
+        height: 20px;
+      }
+    }
   }
   #inviteColaboratorModal {
     width: 200px;

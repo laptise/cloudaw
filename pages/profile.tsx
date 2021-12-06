@@ -1,5 +1,5 @@
 import { GetServerSideProps, NextPage } from "next";
-import Layout, { UserProps } from "../component/Layout";
+import Layout from "../component/Layout";
 import nookies from "nookies";
 import { firebaseAdmin } from "../back/firebaseAdmin";
 import { FormEvent, useState } from "react";

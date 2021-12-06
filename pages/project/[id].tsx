@@ -1,20 +1,120 @@
-import { getDocs } from "@firebase/firestore";
+import { getDocs, onSnapshot } from "@firebase/firestore";
+import { doc, DocumentReference, QueryDocumentSnapshot } from "firebase/firestore";
 import { GetServerSideProps, NextPage } from "next";
-import { useRouter } from "next/dist/client/router";
+import React, { createContext, useEffect, useState } from "react";
 import { getUserFromSession } from "../../back/auth";
 import { firebaseAdmin } from "../../back/firebaseAdmin";
-import DawProvider, { ProjectProp } from "../../component/daw";
-import Layout, { UserProps } from "../../component/Layout";
-import { dynamicConverter, Project as projectEntity, ProjectConverter, Track } from "../../firebase/model";
+import Daw, { ContextMenu } from "../../component/daw";
+import AddNewTrackModal from "../../component/daw/modal/addNewTrack";
+import SettingModal from "../../component/daw/modal/setting";
+import {
+  Collaborator,
+  dynamicConverter,
+  getCollabColRef,
+  getProjectDocRef,
+  getProjectsColRef,
+  getTracksColRef,
+  Project as projectEntity,
+  ProjectConverter,
+  Track,
+} from "../../firebase/model";
 import { toObject } from "../../utils";
 
-interface Props extends UserProps, ProjectProp {}
-const Project: NextPage<Props> = ({ user, project }) => {
-  return <DawProvider project={project} user={user} />;
+export const ModalViewContext = createContext<ModalViewContext>(null as any);
+
+export function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnapshot<Collaborator>) {
+  const { color, displayName } = user.data();
+  const exists = document.querySelector(`[data-by="${user.id}"]`);
+  exists?.parentElement?.removeChild(exists);
+  const elm = document.createElement("div");
+  const border = document.createElement("div");
+  border.className = "border";
+  elm.className = "focusLabel";
+  border.style.borderColor = color;
+  elm.dataset.by = user.id;
+  elm.appendChild(border);
+  target.nextSibling?.appendChild(elm);
+  const badge = document.createElement("div");
+  badge.className = "badge";
+  const img = document.createElement("img");
+  img.innerHTML = "#";
+  badge.append(img);
+  const name = document.createElement("span");
+  name.className = "name";
+  name.innerText = displayName || "unknown";
+  badge.append(name);
+  elm.append(badge);
+}
+const keyPair: any = {};
+
+export const DawContext = createContext<DawContext>(null as any);
+const Project: NextPage<ProjectProp> = ({ user, project }) => {
+  const settingModalViewState = useState(false);
+  const newTrackModalViewState = useState(false);
+  const contextMenuViewState = useState(false);
+  const projectState = useState(project);
+  const tracksState = useState([] as QueryDocumentSnapshot<Track>[]);
+  const projectColRef = getProjectsColRef();
+  const projectRef = doc(projectColRef, project.id as string);
+  const tracksColRef = getTracksColRef(projectRef);
+  const collabColRef = getCollabColRef(projectRef);
+
+  const attach = () => {
+    onSnapshot(projectRef, (doc) => {
+      const [pjt, setPjt] = projectState;
+      const data = doc.data();
+      if (data) setPjt(data);
+    });
+    onSnapshot(tracksColRef, (snapshot) => {
+      const [val, setVal] = tracksState;
+      const tracks = snapshot.docs;
+      setVal(tracks);
+    });
+    onSnapshot(collabColRef, (snapshot) => {
+      snapshot.docs
+        .filter((doc) => {
+          return doc.id != user.uid;
+        })
+        .forEach((snapshot) => {
+          const x = snapshot.data();
+          const target = document.querySelector<HTMLInputElement>(`#${x.focusing}`);
+          target && snapshot.id && setFocusTarget(target, snapshot);
+        });
+    });
+  };
+  const detach = () => {
+    onSnapshot(projectRef, () => {});
+    onSnapshot(tracksColRef, () => {});
+    onSnapshot(collabColRef, () => {});
+  };
+  const keyBind = () => {
+    document.onkeydown = (e) => {
+      console.log(e.metaKey);
+      console.log(keyPair);
+    };
+  };
+  useEffect(() => {
+    attach();
+    keyBind();
+    return detach;
+  }, []);
+
+  return (
+    <main id="daw" onContextMenu={(e) => e.preventDefault()}>
+      <DawContext.Provider value={{ user, tracksState, projectState, projectRef: getProjectDocRef(getProjectsColRef(), project.id as string) }}>
+        <ModalViewContext.Provider value={{ settingModalViewState, newTrackModalViewState }}>
+          <ContextMenu />
+          <AddNewTrackModal />
+          <SettingModal />
+          <Daw project={project} user={user} />
+        </ModalViewContext.Provider>
+      </DawContext.Provider>
+    </main>
+  );
 };
 
 // This gets called on every request
-export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+export const getServerSideProps: GetServerSideProps<ProjectProp> = async (ctx) => {
   const { id } = ctx.query;
   const project = await firebaseAdmin
     .firestore()

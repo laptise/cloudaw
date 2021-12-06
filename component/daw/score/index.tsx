@@ -1,8 +1,9 @@
 import { QueryDocumentSnapshot, updateDoc } from "@firebase/firestore";
 import { doc } from "firebase/firestore";
 import React, { useContext, useRef, useState } from "react";
-import { DawContext, ModalViewContext, ProjectProp } from "..";
+import { ProjectProp } from "..";
 import { getCollabColRef, getFocusColRef, getFocusDocRef, Track } from "../../../firebase/model";
+import { DawContext, ModalViewContext } from "../../../pages/project/[id]";
 
 const TrackCtl: React.FC<ChannelProps> = (props) => {
   const [init, setInit] = useState(0);
@@ -42,6 +43,7 @@ const Channel: React.FC<ChannelProps> = (props) => {
       const docRef2 = doc(colRef, user.uid);
       updateDoc(docRef2, {
         focusing: `${focuser.current.id}`,
+        displayName: user.displayName || "unknown",
       });
     }
   };

@@ -3,7 +3,7 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { UserRecord } from "firebase-admin/lib/auth/user-record";
 import React, { Dispatch, SetStateAction, useContext, useState } from "react";
-import { DawContext, ModalViewContext } from "..";
+import { DawContext, ModalViewContext } from "../../../pages/project/[id]";
 import { FlexCol } from "../../flexBox";
 import Modal from "../../modal";
 
