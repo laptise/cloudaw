@@ -21,7 +21,7 @@ import {
 import { toObject } from "../../utils";
 
 export const ModalViewContext = createContext<ModalViewContext>(null as any);
-
+export const ContextMenuContext = createContext<ContextMenuContext>(null as any);
 export function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnapshot<Collaborator>) {
   const { color, displayName } = user.data();
   const exists = document.querySelector(`[data-by="${user.id}"]`);
@@ -52,6 +52,7 @@ const Project: NextPage<ProjectProp> = ({ user, project }) => {
   const settingModalViewState = useState(false);
   const newTrackModalViewState = useState(false);
   const contextMenuViewState = useState(false);
+  const conteextGroupState = useState([] as unknown as ContextGroup[]);
   const projectState = useState(project);
   const tracksState = useState([] as QueryDocumentSnapshot<Track>[]);
   const projectColRef = getProjectsColRef();
@@ -103,10 +104,12 @@ const Project: NextPage<ProjectProp> = ({ user, project }) => {
     <main id="daw" onContextMenu={(e) => e.preventDefault()}>
       <DawContext.Provider value={{ user, tracksState, projectState, projectRef: getProjectDocRef(getProjectsColRef(), project.id as string) }}>
         <ModalViewContext.Provider value={{ settingModalViewState, newTrackModalViewState }}>
-          <ContextMenu />
-          <AddNewTrackModal />
-          <SettingModal />
-          <Daw project={project} user={user} />
+          <ContextMenuContext.Provider value={{ view: contextMenuViewState, groups: conteextGroupState }}>
+            <ContextMenu />
+            <AddNewTrackModal />
+            <SettingModal />
+            <Daw project={project} user={user} />
+          </ContextMenuContext.Provider>
         </ModalViewContext.Provider>
       </DawContext.Provider>
     </main>

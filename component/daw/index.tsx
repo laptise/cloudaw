@@ -23,10 +23,6 @@ import SettingModal from "./modal/setting";
 import Link from "next/link";
 import { ModalViewContext } from "../../pages/project/[id]";
 
-interface ContextMenuContext {
-  view: State<boolean>;
-}
-
 export const ContextMenu = () => {
   return <div id="contextMenu"></div>;
 };

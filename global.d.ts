@@ -26,9 +26,21 @@ declare global {
     settingModalViewState: State<boolean>;
     newTrackModalViewState: State<boolean>;
   }
+
+  interface ContextItem {
+    label: string;
+    action(): any;
+    disabled: boolean;
+  }
+
+  interface ContextGroup {
+    label?: string;
+    items: ContextItem[];
+  }
   /**コンテクストメニュー状態 */
   interface ContextMenuContext {
     /**表示状態 */
     view: State<boolean>;
+    groups: State<ContextGroup[]>;
   }
 }

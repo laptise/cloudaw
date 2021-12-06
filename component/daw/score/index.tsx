@@ -1,7 +1,6 @@
 import { QueryDocumentSnapshot, updateDoc } from "@firebase/firestore";
 import { doc } from "firebase/firestore";
 import React, { useContext, useRef, useState } from "react";
-import { ProjectProp } from "..";
 import { getCollabColRef, getFocusColRef, getFocusDocRef, Track } from "../../../firebase/model";
 import { DawContext, ModalViewContext } from "../../../pages/project/[id]";
 
