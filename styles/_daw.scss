@@ -178,6 +178,17 @@
         padding: 5px;
         background-color: rgba(0, 0, 0, 0.2);
         border-bottom: 1px solid gray;
+        button {
+          font-size: 13px;
+          font-weight: bold;
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+          color: white;
+          background-color: rgba(0, 0, 0, 0.5);
+          padding: 2.5px 5px;
+          border-radius: 5px;
+        }
       }
       .channel {
         border-bottom: 1px solid gray;

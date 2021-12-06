@@ -1,4 +1,6 @@
 import { QueryDocumentSnapshot, updateDoc } from "@firebase/firestore";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { doc } from "firebase/firestore";
 import React, { useContext, useRef, useState } from "react";
 import { getCollabColRef, getFocusColRef, getFocusDocRef, TrackEntity } from "../../../firebase/model";
@@ -10,7 +12,10 @@ const ScoreTool: React.FC = (props) => {
   const [view, setView] = newTrackModalViewState;
   return (
     <div id="scoreTool">
-      <button onClick={() => setView(true)}>+</button>
+      <button onClick={() => setView(true)}>
+        <FontAwesomeIcon icon={faPlus} />
+        トラック追加
+      </button>
     </div>
   );
 };
