@@ -4,6 +4,7 @@ import { getCollabColRef, TrackEntity } from "../../../../firebase/model";
 import { ContextMenuContext, DawContext } from "../../../../pages/project/[id]";
 import TrackCtl from "./ctl";
 
+/**トラック */
 const Track: React.FC<ChannelProps> = (props) => {
   const { projectRef, user } = useContext(DawContext);
   const { contextMenuViewState, leftState, topState, contextMenuGroupState } = useContext(ContextMenuContext);

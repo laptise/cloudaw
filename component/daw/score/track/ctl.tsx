@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+/**トラックコントロール */
 const TrackCtl: React.FC<ChannelProps> = (props) => {
   const [init, setInit] = useState(0);
   const { width, setWidth, track } = props;
