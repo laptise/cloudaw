@@ -52,6 +52,8 @@ export class ProjectEntity extends BaseEntity {
   createdAt!: Date;
   updatedAt!: Date;
   collaborator!: string[];
+  bar!: number;
+  bpm!: number;
 }
 
 export class FocusInfo extends BaseEntity {

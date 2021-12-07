@@ -185,6 +185,7 @@
     }
     #scores {
       flex: 1;
+      min-width: 2000px;
       border: 1px solid gray;
       overflow: auto;
       display: flex;
@@ -195,8 +196,11 @@
         position: inherit;
         background-color: rgba(0, 0, 0, 0.5);
         #timeLine {
+          flex: 1;
           position: relative;
           height: 100%;
+          display: flex;
+          overflow: auto;
           #currentPoint {
             position: absolute;
             left: 0;
@@ -214,6 +218,16 @@
               border-color: #00000071 transparent transparent transparent;
             }
           }
+        }
+      }
+      .barArea {
+        flex: 1;
+        width: 40px;
+        border-right: 1px solid rgba(0, 0, 0, 0.3);
+        &:last-of-type {
+          border-right: none;
+        }
+        .barIndex {
         }
       }
       #scoreTool {
@@ -235,7 +249,6 @@
       .channel {
         border-bottom: 1px solid gray;
         display: flex;
-        min-width: 2000px;
         position: relative;
         .ctl {
           padding: 10px;
@@ -251,6 +264,9 @@
           height: 100%;
           background-color: rgb(88, 88, 88);
           position: relative;
+          display: flex;
+          overflow: auto;
+
           .playBar {
             position: absolute;
             z-index: 1;

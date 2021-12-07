@@ -6,8 +6,9 @@ import TrackCtl from "./ctl";
 
 /**トラック */
 const Track: React.FC<ChannelProps> = (props) => {
-  const { projectRef, user } = useContext(DawContext);
+  const { projectRef, user, projectState } = useContext(DawContext);
   const { contextMenuViewState, leftState, topState, contextMenuGroupState } = useContext(ContextMenuContext);
+  const [pjt] = projectState;
   const [ctxLeft, setCtxLeft] = leftState;
   const [ctxTop, setCtxTop] = topState;
   const [group, setGroup] = contextMenuGroupState;
@@ -76,6 +77,11 @@ const Track: React.FC<ChannelProps> = (props) => {
       <div onClick={focus} className="channel focusTarget" style={{ height }} onContextMenu={callContext}>
         <TrackCtl {...props} />
         <div className="board">
+          {new Array(pjt.bpm).fill(null).map((bar, index) => (
+            <div className="barArea" key={index}>
+              <span className="barIndex"> </span>
+            </div>
+          ))}
           <div className="playBar"></div>
         </div>
         <div className="resizeBar bottom" onMouseDown={mouseDown}></div>

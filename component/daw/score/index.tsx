@@ -22,6 +22,7 @@ const ScoreTool: React.FC = (props) => {
 
 const Score: React.FC = (props) => {
   const { projectState, tracksState } = useContext(DawContext);
+  const [pjt] = projectState;
   const [trackList] = tracksState;
   const [width, setCtlWidth] = useState(200);
 
@@ -31,6 +32,11 @@ const Score: React.FC = (props) => {
       <div id="timeLineBox">
         <div style={{ width }}></div>
         <div id="timeLine">
+          {new Array(pjt.bpm).fill(null).map((bar, index) => (
+            <div className="barArea" key={index}>
+              <span className="barIndex"> </span>
+            </div>
+          ))}
           <div id="currentPoint">
             <div style={{ position: "relative", marginLeft: -8 }}>
               <div id="triangle"></div>

@@ -1,12 +1,14 @@
 import { faBackward, faForward, faPause, faPlay, faStop, faUndo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useRef, useState } from "react";
-import { ContextMenuContext } from "../../pages/project/[id]";
+import { useContext, useEffect, useRef, useState } from "react";
+import { ContextMenuContext, DawContext } from "../../pages/project/[id]";
 
 const TopPannel = () => {
   const [audio, setAudio] = useState<HTMLAudioElement>(null as any);
   const [audio2, setAudio2] = useState<HTMLAudioElement>(null as any);
   const [isPlaying, setIsPlaying] = useState(false);
+  const { projectState } = useContext(DawContext);
+  const [pjt] = projectState;
   useEffect(() => {
     setAudio(new Audio("/Acoustic%20L-min2.wav"));
     setAudio2(new Audio("/Lead Electric-min2.wav"));
@@ -39,7 +41,6 @@ const TopPannel = () => {
             <FontAwesomeIcon onClick={play} icon={faPlay} />
           </button>
         )}
-
         <button>
           <FontAwesomeIcon icon={faUndo} />
         </button>
@@ -47,6 +48,7 @@ const TopPannel = () => {
           <FontAwesomeIcon icon={faForward} />
         </button>
       </div>
+      <div>BPM : {pjt.bpm}</div>
     </div>
   );
 };
