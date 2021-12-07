@@ -152,13 +152,28 @@
   background-color: #ccc;
   display: flex;
   flex-direction: column;
-  #playBackCtl {
-    background-color: #333;
+  #topPannel {
+    background-color: rgb(97, 97, 97);
     width: 100%;
     height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
+    #playbackCtl {
+      border-radius: 10px;
+      overflow: hidden;
+      background-color: rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.7);
+      button {
+        padding: 10px;
+        border-right: 0.5px solid rgba(255, 255, 255, 0.3);
+        font-size: 20px;
+        color: white;
+        &:last-of-type {
+          border-right: none;
+        }
+      }
+    }
   }
   .centerRow {
     flex: 1;
@@ -174,6 +189,33 @@
       overflow: auto;
       display: flex;
       flex-direction: column;
+      #timeLineBox {
+        height: 25px;
+        display: flex;
+        position: inherit;
+        background-color: rgba(0, 0, 0, 0.5);
+        #timeLine {
+          position: relative;
+          height: 100%;
+          #currentPoint {
+            position: absolute;
+            left: 0;
+            bottom: 15px;
+
+            #triangle {
+              &:hover {
+              }
+              cursor: pointer;
+              position: absolute;
+              width: 0;
+              height: 0;
+              border-style: solid;
+              border-width: 12.5px 7.5px 0 7.5px;
+              border-color: #00000071 transparent transparent transparent;
+            }
+          }
+        }
+      }
       #scoreTool {
         padding: 5px;
         background-color: rgba(0, 0, 0, 0.2);
@@ -208,6 +250,16 @@
           flex: 1;
           height: 100%;
           background-color: rgb(88, 88, 88);
+          position: relative;
+          .playBar {
+            position: absolute;
+            z-index: 1;
+            width: 1px;
+            height: 100%;
+            left: 0;
+            background-color: red;
+            top: 0;
+          }
         }
       }
     }

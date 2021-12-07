@@ -23,13 +23,23 @@ const ScoreTool: React.FC = (props) => {
 const Score: React.FC = (props) => {
   const { projectState, tracksState } = useContext(DawContext);
   const [trackList] = tracksState;
-  const [ctlWidth, setCtlWidth] = useState(200);
+  const [width, setCtlWidth] = useState(200);
 
   return (
     <div id="scores">
       <ScoreTool {...props} />
+      <div id="timeLineBox">
+        <div style={{ width }}></div>
+        <div id="timeLine">
+          <div id="currentPoint">
+            <div style={{ position: "relative", marginLeft: -8 }}>
+              <div id="triangle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
       {trackList.map((x, index) => (
-        <Track width={ctlWidth} setWidth={setCtlWidth} track={x} key={index} />
+        <Track width={width} setWidth={setCtlWidth} track={x} key={index} />
       ))}
     </div>
   );

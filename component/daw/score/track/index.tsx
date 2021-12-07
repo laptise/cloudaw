@@ -75,7 +75,9 @@ const Track: React.FC<ChannelProps> = (props) => {
       <input type="radio" className="focusChecker" data-doc-type="track" id={`track-${track.id}`} name={`focusFor1`} ref={focuser} />
       <div onClick={focus} className="channel focusTarget" style={{ height }} onContextMenu={callContext}>
         <TrackCtl {...props} />
-        <div className="board"></div>
+        <div className="board">
+          <div className="playBar"></div>
+        </div>
         <div className="resizeBar bottom" onMouseDown={mouseDown}></div>
       </div>
     </>

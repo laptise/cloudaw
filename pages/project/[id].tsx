@@ -96,7 +96,6 @@ const Project: NextPage<ProjectProp> = ({ user, project }) => {
   };
   const keyBind = () => {
     document.onkeydown = (e) => {
-      e.preventDefault();
       if (e.metaKey && e.key == "d") {
         e.preventDefault();
       }

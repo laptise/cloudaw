@@ -11,6 +11,7 @@ import { faCog, faHome } from "@fortawesome/free-solid-svg-icons";
 import SettingModal from "./modal/setting";
 import Link from "next/link";
 import { ContextMenuContext, ModalViewContext } from "../../pages/project/[id]";
+import LeftPannel from "./leftPannel";
 
 const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const { settingModalViewState } = useContext(ModalViewContext);
@@ -31,12 +32,13 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
           <FontAwesomeIcon icon={faCog} />
         </button>
       </header>
+      <TopPannel />
       <Head>
         <title>{project.name}</title>
       </Head>
-      <div id="playBackCtl"></div>
+      {/* <div id="playBackCtl"></div> */}
       <FlexRow className="centerRow">
-        <TopPannel />
+        <LeftPannel />
         <Score />
       </FlexRow>
     </>
