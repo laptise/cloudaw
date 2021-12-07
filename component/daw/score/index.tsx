@@ -34,7 +34,7 @@ const Score: React.FC = (props) => {
         <div id="timeLine">
           {new Array(pjt.bpm).fill(null).map((bar, index) => (
             <div className="barArea" key={index}>
-              <span className="barIndex"> </span>
+              <span className="barIndex">{index}</span>
             </div>
           ))}
           <div id="currentPoint">

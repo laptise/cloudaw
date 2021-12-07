@@ -224,10 +224,12 @@
         flex: 1;
         width: 40px;
         border-right: 1px solid rgba(0, 0, 0, 0.3);
+        position: relative;
         &:last-of-type {
           border-right: none;
         }
         .barIndex {
+          position: absolute;
         }
       }
       #scoreTool {
