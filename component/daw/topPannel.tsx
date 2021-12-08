@@ -1,26 +1,24 @@
 import { faBackward, faForward, faPause, faPlay, faStop, faUndo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { timeStamp } from "console";
 import { useContext, useEffect, useRef, useState } from "react";
-import { ContextMenuContext, DawContext } from "../../pages/project/[id]";
+import { DawContext } from ".";
 
 const TopPannel = () => {
   const [audio, setAudio] = useState<HTMLAudioElement>(null as any);
   const [audio2, setAudio2] = useState<HTMLAudioElement>(null as any);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const { projectState } = useContext(DawContext);
+  const { playingState, projectState, timeState } = useContext(DawContext);
+  const [bar, count, ms] = timeState[0];
+  const [isPlaying, setIsPlaying] = playingState;
   const [pjt] = projectState;
   useEffect(() => {
     setAudio(new Audio("/Acoustic%20L-min2.wav"));
     setAudio2(new Audio("/Lead Electric-min2.wav"));
   }, []);
   const play = () => {
-    audio.play();
-    audio2.play();
     setIsPlaying(true);
   };
   const pause = () => {
-    audio2.pause();
-    audio.pause();
     setIsPlaying(false);
   };
   return (
@@ -48,7 +46,14 @@ const TopPannel = () => {
           <FontAwesomeIcon icon={faForward} />
         </button>
       </div>
-      <div>BPM : {pjt.bpm}</div>
+      <div id="timeSetInfo">
+        <div className="row">BPM : {pjt.bpm}</div>
+        <div className="row">
+          <span>{bar}.</span>
+          <span>{count}.</span>
+          <span>{ms}</span>
+        </div>
+      </div>
     </div>
   );
 };

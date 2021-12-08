@@ -159,6 +159,24 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    #timeSetInfo {
+      width: 100px;
+      display: flex;
+      flex-direction: column;
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 5px;
+      border-radius: 10px;
+      .row {
+        display: flex;
+        font-size: 14px;
+        color: white;
+        justify-content: flex-end;
+        span {
+          flex: 1;
+          text-align: right;
+        }
+      }
+    }
     #playbackCtl {
       border-radius: 10px;
       overflow: hidden;
@@ -185,7 +203,6 @@
     }
     #scores {
       flex: 1;
-      min-width: 2000px;
       border: 1px solid gray;
       overflow: auto;
       display: flex;
@@ -196,6 +213,7 @@
         position: inherit;
         background-color: rgba(0, 0, 0, 0.5);
         #timeLine {
+          overflow: auto;
           flex: 1;
           position: relative;
           height: 100%;
@@ -262,6 +280,7 @@
           position: relative;
         }
         .board {
+          overflow: auto;
           flex: 1;
           height: 100%;
           background-color: rgb(88, 88, 88);

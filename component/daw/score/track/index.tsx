@@ -1,7 +1,7 @@
 import { addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import React, { useContext, useRef, useState } from "react";
 import { getCollabColRef, getTracksColRef, TrackEntity } from "../../../../firebase/model";
-import { ContextMenuContext, DawContext } from "../../../../pages/project/[id]";
+import { ContextMenuContext, DawContext } from "../../index";
 import TrackCtl from "./ctl";
 
 /**トラック */

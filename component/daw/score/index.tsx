@@ -1,10 +1,7 @@
-import { QueryDocumentSnapshot, updateDoc } from "@firebase/firestore";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { doc } from "firebase/firestore";
 import React, { useContext, useRef, useState } from "react";
-import { getCollabColRef, getFocusColRef, getFocusDocRef, TrackEntity } from "../../../firebase/model";
-import { ContextMenuContext, DawContext, ModalViewContext } from "../../../pages/project/[id]";
+import { ContextMenuContext, DawContext, ModalViewContext } from "../index";
 import Track from "./track";
 
 const ScoreTool: React.FC = (props) => {

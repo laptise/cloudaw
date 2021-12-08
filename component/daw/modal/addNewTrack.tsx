@@ -1,7 +1,7 @@
 import { addDoc } from "@firebase/firestore";
 import React, { useContext, useState } from "react";
 import { getTracksColRef, TrackEntity } from "../../../firebase/model";
-import { DawContext, ModalViewContext } from "../../../pages/project/[id]";
+import { DawContext, ModalViewContext } from "../index";
 import Modal from "../../modal";
 
 interface Props {}

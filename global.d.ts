@@ -1,6 +1,7 @@
 import { DocumentReference, QueryDocumentSnapshot } from "@firebase/firestore";
 import { Dispatch, SetStateAction } from "react";
 import { ProjectEntity, TrackEntity } from "./firebase/model";
+import { TimeContext } from "./utils";
 declare global {
   /**User included */
   interface UserProps {
@@ -13,6 +14,7 @@ declare global {
   /**useState型 */
   type State<S> = [S, Dispatch<SetStateAction<S>>];
 
+  type TimeSet = [number, number, number];
   interface DawContext extends UserProps {
     /**プロジェクトの情報 */
     projectState: State<ProjectEntity>;
@@ -20,6 +22,9 @@ declare global {
     tracksState: State<QueryDocumentSnapshot<TrackEntity>[]>;
     /**プロジェクトレファレンス */
     projectRef: DocumentReference<ProjectEntity>;
+    playingState: State<boolean>;
+    timeState: State<TimeSet>;
+    timeContextState: State<TimeContext>;
   }
   /**モーダルの表示状態 */
   interface ModalViewContext {
