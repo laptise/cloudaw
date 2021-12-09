@@ -12,7 +12,7 @@ export class TimeContext {
   private _count!: number;
   private _bpm!: number;
   private _milliSecond!: number;
-  private milliSecondsPerBeat!: number;
+  public milliSecondsPerBeat!: number;
   public secondsPerBeat!: number;
   constructor(countsPerBar: number, bpm: number) {
     this.countsPerBar = countsPerBar;
@@ -41,6 +41,7 @@ export class TimeContext {
   set bpm(v) {
     this._bpm = v;
     this.milliSecondsPerBeat = this.getCountIncreasePer();
+    console.log(this.milliSecondsPerBeat);
     this.secondsPerBeat = this.milliSecondsPerBeat / 1000;
   }
   get count() {

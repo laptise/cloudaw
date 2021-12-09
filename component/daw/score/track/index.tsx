@@ -77,7 +77,7 @@ const Track: React.FC<ChannelProps> = (props) => {
       <div onClick={focus} className="channel focusTarget" style={{ height }} onContextMenu={callContext}>
         <TrackCtl {...props} />
         <div className="board">
-          {new Array(pjt.bpm).fill(null).map((bar, index) => (
+          {new Array(pjt.bar).fill(null).map((bar, index) => (
             <div className="barArea" key={index}>
               <span className="barIndex"> </span>
             </div>

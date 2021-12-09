@@ -86,29 +86,31 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
     onSnapshot(tracksColRef, () => {});
     onSnapshot(collabColRef, () => {});
   };
+
   const keyBind = () => {
     document.onkeydown = (e) => {
-      if (e.metaKey && e.key == "d") {
-        e.preventDefault();
+      if (e.code === "Space") {
+        setIsPlaying(!isPlaying);
       }
-      console.log(e.metaKey);
     };
   };
   useEffect(() => {
     attach();
-    keyBind();
     return detach;
   }, []);
 
   useEffect(() => {
     //playControl
+    keyBind();
+    const totalLong = pjt.bar * timeContext.milliSecondsPerBeat;
     timeContext.onTick = (bar, count, ms, time) => {
       setTimeSet([bar, count, ms]);
-      const tt = pjt.bar * timeContext.secondsPerBeat;
-      console.log(timeContext.secondsPerBeat);
+      const currentRatePosition = time.valueOf() / totalLong;
+
+      console.log(currentRatePosition);
     };
     isPlaying ? timeContext.go() : timeContext.puase();
-  }, [isPlaying]);
+  }, [isPlaying, setIsPlaying]);
   return (
     <>
       <header onContextMenu={(e) => console.log(19878897)}>

@@ -29,7 +29,7 @@ const Score: React.FC = (props) => {
       <div id="timeLineBox">
         <div style={{ width }}></div>
         <div id="timeLine">
-          {new Array(pjt.bpm).fill(null).map((bar, index) => (
+          {new Array(pjt.bar).fill(null).map((bar, index) => (
             <div className="barArea" key={index}>
               <span className="barIndex">{index}</span>
             </div>
