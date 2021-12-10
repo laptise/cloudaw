@@ -223,6 +223,7 @@
             position: absolute;
             left: 0;
             bottom: 15px;
+            transition: left 10ms;
 
             #triangle {
               &:hover {
@@ -288,6 +289,20 @@
           display: flex;
           overflow: auto;
 
+          .region {
+            position: absolute;
+            // border: 1px solid #ccc;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 1);
+            padding: 10px;
+            border-radius: 5px;
+            height: 100%;
+            color: white;
+            z-index: 1;
+            background-color: rgb(49, 49, 49);
+            &:hover {
+              filter: brightness(1.2);
+            }
+          }
           .playBar {
             position: absolute;
             z-index: 1;
@@ -296,6 +311,7 @@
             left: 0;
             background-color: red;
             top: 0;
+            transition: left 10ms;
           }
         }
       }

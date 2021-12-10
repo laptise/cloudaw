@@ -25,6 +25,7 @@ declare global {
     playingState: State<boolean>;
     timeState: State<TimeSet>;
     timeContextState: State<TimeContext>;
+    curerntRatePositionState: State<number>;
   }
   /**モーダルの表示状態 */
   interface ModalViewContext {

@@ -1,4 +1,4 @@
-import { getDocs, onSnapshot } from "@firebase/firestore";
+import { collection, getDoc, getDocs, onSnapshot } from "@firebase/firestore";
 import { doc, DocumentReference, QueryDocumentSnapshot } from "firebase/firestore";
 import { GetServerSideProps, NextPage } from "next";
 import React, { createContext, useEffect, useState } from "react";
@@ -18,6 +18,7 @@ import {
   ProjectEntity as projectEntity,
   ProjectConverter,
   TrackEntity,
+  getRegionColRef,
 } from "../../firebase/model";
 import { toObject } from "../../utils";
 
@@ -43,7 +44,16 @@ export const getServerSideProps: GetServerSideProps<ProjectProp> = async (ctx) =
     .then(async (data) => {
       const doc = data.data() as projectEntity;
       const tracksRef = data.ref.collection("tracks").withConverter(dynamicConverter(TrackEntity) as any);
-      doc.trackList = (await tracksRef.get().then((res) => res.docs.map((x) => x.data()))) as any;
+      doc.trackList = (await tracksRef.get().then((res) =>
+        res.docs.map(async (x) => {
+          const ref = x.ref;
+          const data = x.data();
+          const colRef = ref.collection("regions");
+          const docs = await colRef.get();
+          console.log(docs);
+          return data;
+        })
+      )) as any;
       console.log(doc.trackList);
       doc.id = data.id;
       return doc;

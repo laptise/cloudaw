@@ -1,14 +1,17 @@
-import { addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
-import React, { useContext, useRef, useState } from "react";
-import { getCollabColRef, getTracksColRef, TrackEntity } from "../../../../firebase/model";
+import { addDoc, deleteDoc, doc, onSnapshot, QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { getCollabColRef, getRegionColRef, getTracksColRef, RegionEntity, TrackEntity } from "../../../../firebase/model";
 import { ContextMenuContext, DawContext } from "../../index";
 import TrackCtl from "./ctl";
+import Region from "./region";
 
 /**トラック */
 const Track: React.FC<ChannelProps> = (props) => {
-  const { projectRef, user, projectState } = useContext(DawContext);
+  const { projectRef, user, projectState, curerntRatePositionState } = useContext(DawContext);
   const { contextMenuViewState, leftState, topState, contextMenuGroupState } = useContext(ContextMenuContext);
+  const [currentRatePosition] = curerntRatePositionState;
   const [pjt] = projectState;
+  const [regions, setRegions] = useState([] as unknown as QueryDocumentSnapshot<RegionEntity>[]);
   const [ctxLeft, setCtxLeft] = leftState;
   const [ctxTop, setCtxTop] = topState;
   const [group, setGroup] = contextMenuGroupState;
@@ -16,6 +19,7 @@ const Track: React.FC<ChannelProps> = (props) => {
   const [height, setHeight] = useState(80);
   const focuser = useRef<HTMLInputElement>(null);
   const { track } = props;
+
   const { name } = track.data();
   const focus = async () => {
     if (focuser.current) {
@@ -35,6 +39,13 @@ const Track: React.FC<ChannelProps> = (props) => {
       document.onmouseup = () => (document.onmousemove = () => {});
     };
   };
+  useEffect(() => {
+    const ref = getRegionColRef(track.ref);
+    onSnapshot(ref, (snapshot) => {
+      const docs = snapshot.docs;
+      setRegions(docs);
+    });
+  }, []);
   const callContext = (e: React.MouseEvent) => {
     setCtxLeft(e.clientX);
     setCtxTop(e.clientY);
@@ -77,12 +88,15 @@ const Track: React.FC<ChannelProps> = (props) => {
       <div onClick={focus} className="channel focusTarget" style={{ height }} onContextMenu={callContext}>
         <TrackCtl {...props} />
         <div className="board">
+          {regions?.map?.((region, index) => (
+            <Region snapshot={region} key={index} />
+          ))}
           {new Array(pjt.bar).fill(null).map((bar, index) => (
             <div className="barArea" key={index}>
               <span className="barIndex"> </span>
             </div>
           ))}
-          <div className="playBar"></div>
+          <div className="playBar" style={{ left: currentRatePosition * 100 + "%" }}></div>
         </div>
         <div className="resizeBar bottom" onMouseDown={mouseDown}></div>
       </div>

@@ -18,7 +18,8 @@ const ScoreTool: React.FC = (props) => {
 };
 
 const Score: React.FC = (props) => {
-  const { projectState, tracksState } = useContext(DawContext);
+  const { projectState, tracksState, curerntRatePositionState } = useContext(DawContext);
+  const [currentPositionRate] = curerntRatePositionState;
   const [pjt] = projectState;
   const [trackList] = tracksState;
   const [width, setCtlWidth] = useState(200);
@@ -34,8 +35,8 @@ const Score: React.FC = (props) => {
               <span className="barIndex">{index}</span>
             </div>
           ))}
-          <div id="currentPoint">
-            <div style={{ position: "relative", marginLeft: -8 }}>
+          <div id="currentPoint" style={{ left: currentPositionRate * 100 + "%" }}>
+            <div style={{ position: "relative", marginLeft: -7 }}>
               <div id="triangle"></div>
             </div>
           </div>

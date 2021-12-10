@@ -46,7 +46,8 @@ export function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnap
 
 const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const { settingModalViewState } = useContext(ModalViewContext);
-  const { projectState, tracksState, playingState, timeState, timeContextState } = useContext(DawContext);
+  const { projectState, tracksState, playingState, timeState, timeContextState, curerntRatePositionState } = useContext(DawContext);
+  const [currentPosition, setCurrentPosition] = curerntRatePositionState;
   const [timeContext, setTimeContext] = timeContextState;
   const [timeSet, setTimeSet] = timeState;
   const [isPlaying, setIsPlaying] = playingState;
@@ -64,6 +65,7 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
       if (data) setPjt(data);
     });
     onSnapshot(tracksColRef, (snapshot) => {
+      console.log("track");
       const [val, setVal] = tracksState;
       const tracks = snapshot.docs;
       setVal(tracks);
@@ -80,6 +82,7 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
         });
     });
   };
+  useEffect(() => {}, [pjt]);
   /**スナップショットリスナー解除 */
   const detach = () => {
     onSnapshot(projectRef, () => {});
@@ -106,8 +109,7 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
     timeContext.onTick = (bar, count, ms, time) => {
       setTimeSet([bar, count, ms]);
       const currentRatePosition = time.valueOf() / totalLong;
-
-      console.log(currentRatePosition);
+      setCurrentPosition(currentRatePosition);
     };
     isPlaying ? timeContext.go() : timeContext.puase();
   }, [isPlaying, setIsPlaying]);
@@ -153,9 +155,11 @@ const DawProvider: React.FC<ProjectProp> = (props) => {
   const tracksState = useState([] as QueryDocumentSnapshot<TrackEntity>[]);
   const projectState = useState(project);
   const timeState = useState([0, 0, 0] as TimeSet);
+  const curerntRatePositionState = useState(0);
   return (
     <DawContext.Provider
       value={{
+        curerntRatePositionState,
         timeContextState,
         timeState,
         playingState,

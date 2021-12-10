@@ -41,7 +41,6 @@ export class TimeContext {
   set bpm(v) {
     this._bpm = v;
     this.milliSecondsPerBeat = this.getCountIncreasePer();
-    console.log(this.milliSecondsPerBeat);
     this.secondsPerBeat = this.milliSecondsPerBeat / 1000;
   }
   get count() {
@@ -86,7 +85,6 @@ export class TimeContext {
   }
   puase() {
     this.isPaused = true;
-    console.log(1987);
     clearInterval(this.interval);
   }
   onTick(bar: number, count: number, ms: number, time: Date) {}

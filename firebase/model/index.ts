@@ -39,6 +39,12 @@ export class BaseEntity {
 
 export class TrackEntity extends BaseEntity {
   name!: string;
+  regions!: RegionEntity[];
+}
+
+export class RegionEntity extends BaseEntity {
+  src!: string;
+  startAt!: Date;
 }
 
 export class FocusEntity extends BaseEntity {
@@ -107,6 +113,9 @@ export const getCollabColRef = (docRef: DocumentReference<ProjectEntity>) =>
 
 export const getTracksColRef = (docRef: DocumentReference<ProjectEntity>) =>
   collection(docRef, "tracks").withConverter(dynamicConverter(TrackEntity));
+
+export const getRegionColRef = (docRef: DocumentReference<TrackEntity>) =>
+  collection(docRef, "regions").withConverter(dynamicConverter(RegionEntity));
 
 export const getFocusColRef = (docRef: DocumentReference<ProjectEntity>) => collection(docRef, "focus").withConverter(dynamicConverter(FocusEntity));
 
