@@ -302,6 +302,8 @@
             &:hover {
               filter: brightness(1.2);
             }
+            overflow: hidden;
+            font-size: 12px;
           }
           .playBar {
             position: absolute;

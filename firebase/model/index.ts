@@ -45,6 +45,7 @@ export class TrackEntity extends BaseEntity {
 export class RegionEntity extends BaseEntity {
   src!: string;
   startAt!: Date;
+  duration!: number;
 }
 
 export class FocusEntity extends BaseEntity {
@@ -80,6 +81,11 @@ export function dynamicConverter<T extends object>(constructor: new (data?: obje
     },
     fromFirestore(snapshot, options) {
       const data = snapshot.data(options)!;
+      for (const [key, value] of Object.entries(data)) {
+        if (value?.toDate) {
+          data[key] = value.toDate()?.toJSON();
+        }
+      }
       return new constructor(data);
     },
   };

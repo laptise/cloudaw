@@ -1,3 +1,5 @@
+import { ProjectEntity } from "../firebase/model";
+
 /**プレインオブジェクトにする
  * @param src 対象
  */
@@ -5,10 +7,17 @@ export function toObject<T>(src: T): T {
   return JSON.parse(JSON.stringify(src));
 }
 
+export class GlobFunctions {
+  static getRunTime(project: ProjectEntity) {
+    const { bpm, bar } = project;
+    return (60000 / bpm) * bar;
+  }
+}
+
 export class TimeContext {
   countsPerBar: number;
   bar: number;
-  private time: Date;
+  public time: Date;
   private _count!: number;
   private _bpm!: number;
   private _milliSecond!: number;
@@ -78,6 +87,7 @@ export class TimeContext {
   go() {
     this.interval = setInterval(() => {
       this.time = new Date(this.time.valueOf() + 10);
+      // this.milliSecond = this.time.valueOf()
       const [bar, count, ms] = this.getNotes();
       this.onTick(bar, count, ms, this.time);
       // this.onTick(this.bar, this.count, this.milliSecond);
