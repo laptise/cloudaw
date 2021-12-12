@@ -15,10 +15,6 @@ const TopPannel = () => {
   const [bar, count, ms] = time;
   const [isPlaying, setIsPlaying] = playingState;
   const [pjt] = projectState;
-  useEffect(() => {
-    setAudio(new Audio("/Acoustic%20L-min2.wav"));
-    setAudio2(new Audio("/Lead Electric-min2.wav"));
-  }, []);
   const play = () => {
     setIsPlaying(true);
   };

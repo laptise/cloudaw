@@ -40,6 +40,7 @@ export class BaseEntity {
 export class TrackEntity extends BaseEntity {
   name!: string;
   regions!: RegionEntity[];
+  volume!: number;
 }
 
 export class RegionEntity extends BaseEntity {

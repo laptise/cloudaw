@@ -10,7 +10,6 @@ interface Props {
 
 const Region: React.FC<Props> = ({ snapshot }) => {
   const { projectState, projectRef, curerntRatePositionState, timeContextState, playingState, user } = useContext(DawContext);
-
   const [time] = timeContextState;
   const [isPlaying] = playingState;
   const [current] = curerntRatePositionState;
@@ -80,7 +79,8 @@ const Region: React.FC<Props> = ({ snapshot }) => {
 
   //初期表示としてaudioを格納
   useEffect(() => {
-    setAudio(new Audio(src));
+    const audio = new Audio(src);
+    setAudio(audio);
   }, []);
 
   /**リジョンの持ち上げ */
@@ -93,14 +93,16 @@ const Region: React.FC<Props> = ({ snapshot }) => {
       const changed = e.clientX - startX;
       const newLeft = currentLeft + changed;
       newLeftRate = (newLeft / parentWidth) * 100;
+      if (newLeftRate < 0) newLeftRate = 0;
       setLeft(newLeftRate);
     };
     document.onmouseup = async () => {
+      document.onmousemove = () => {};
+      document.onmouseup = () => {};
       const runTime = GlobFunctions.getRunTime(project);
       const newRate = newLeftRate / 100;
-      const startAt = runTime * newRate;
-      await updateDoc(snapshot.ref, { startAt });
-      document.onmousemove = () => {};
+      const startAt = Math.floor(runTime * newRate);
+      await updateDoc(snapshot.ref, { startAt: startAt < 0 ? 0 : startAt });
     };
   };
   return (
