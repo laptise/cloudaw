@@ -18,6 +18,7 @@ const Region: React.FC<Props> = ({ snapshot }) => {
   const [left, setLeft] = useState(0);
   const [width, setWidth] = useState(0);
   const [audio, setAudio] = useState<HTMLAudioElement>(null as any);
+  const [regionPlaying, setRegionPlaying] = useState(false);
   useEffect(() => {
     const runningTIme = GlobFunctions.getRunTime(project);
     const rate = (startAt.valueOf() / runningTIme) * 100;
@@ -25,13 +26,36 @@ const Region: React.FC<Props> = ({ snapshot }) => {
     setWidth(width);
     setLeft(rate);
   }, [project]);
+  const play = () => {
+    if (regionPlaying) return;
+    setRegionPlaying(true);
+    audio.play();
+  };
+  const pause = () => {
+    if (!regionPlaying) return;
+    audio?.pause();
+    setRegionPlaying(false);
+  };
+  const stop = () => {
+    if (audio) audio.currentTime = 0;
+    if (!regionPlaying) return;
+    else setRegionPlaying(false);
+  };
   useEffect(() => {
     const start = startAt.valueOf();
     const current = time.time.valueOf();
     const end = start + duration;
-    if (current >= start) audio?.play?.();
-    if (!isPlaying || current > end) audio?.pause();
-  }, [current, playingState]);
+    // console.log(isPlaying);
+    if (!isPlaying) {
+      if (current <= end && start <= current) pause();
+      if (current === 0) stop();
+    }
+    if (isPlaying) {
+      if (start <= current && current <= end) {
+        play();
+      } else pause();
+    }
+  }, [current, isPlaying]);
   useEffect(() => {
     setAudio(new Audio(src));
   }, []);
