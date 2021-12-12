@@ -1,4 +1,4 @@
-import { QueryDocumentSnapshot } from "firebase/firestore";
+import { QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { DawContext } from "../..";
 import { RegionEntity } from "../../../../firebase/model";
@@ -88,16 +88,18 @@ const Region: React.FC<Props> = ({ snapshot }) => {
     const startX = e.clientX;
     const parentWidth = (100 * e.currentTarget.clientWidth) / width;
     const currentLeft = (parentWidth * left) / 100;
+    let newLeftRate = 0;
     document.onmousemove = (e) => {
       const changed = e.clientX - startX;
       const newLeft = currentLeft + changed;
-      const newLeftRate = (newLeft / parentWidth) * 100;
+      newLeftRate = (newLeft / parentWidth) * 100;
       setLeft(newLeftRate);
     };
-    document.onmouseup = () => {
+    document.onmouseup = async () => {
       const runTime = GlobFunctions.getRunTime(project);
-      const newStart = runTime * (left / 100);
-      console.log(newStart);
+      const newRate = newLeftRate / 100;
+      const startAt = runTime * newRate;
+      await updateDoc(snapshot.ref, { startAt });
       document.onmousemove = () => {};
     };
   };
