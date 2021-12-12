@@ -27,6 +27,7 @@ declare global {
     timeState: State<TimeSet>;
     timeContextState: State<TimeContext>;
     curerntRatePositionState: State<number>;
+    focusingTrackState: State<string>;
   }
 
   /**モーダルの表示状態 */

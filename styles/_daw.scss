@@ -195,11 +195,20 @@
   }
   .centerRow {
     flex: 1;
-    #pannels {
+    #leftPannel {
       width: 200px;
       border: 1px solid gray;
       border-right: none;
       position: relative;
+      display: flex;
+      flex-direction: column;
+      #trackName {
+        display: flex;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        padding: 10px;
+      }
     }
     #scores {
       flex: 1;

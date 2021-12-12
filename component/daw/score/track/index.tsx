@@ -1,7 +1,8 @@
-import { addDoc, deleteDoc, doc, onSnapshot, QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
+import { UserRecord } from "firebase-admin/lib/auth/user-record";
+import { addDoc, deleteDoc, doc, DocumentReference, onSnapshot, QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import { getCollabColRef, getRegionColRef, getTracksColRef, RegionEntity, TrackEntity } from "../../../../firebase/model";
-import { contextFocus } from "../../../../utils";
+import { getCollabColRef, getRegionColRef, getTracksColRef, ProjectEntity, RegionEntity, TrackEntity } from "../../../../firebase/model";
+import { contextFocus, removeDocumentMouseUpMoveEvent } from "../../../../utils";
 import { ContextMenuContext, DawContext } from "../../index";
 import TrackCtl from "./ctl";
 import Region from "./region";
@@ -10,8 +11,9 @@ export const TrackContext = createContext<TrackContext>(null as any);
 
 /**トラック */
 const Track: React.FC<ChannelProps> = (props) => {
-  const { projectRef, user, projectState, curerntRatePositionState } = useContext(DawContext);
+  const { projectRef, user, projectState, curerntRatePositionState, focusingTrackState } = useContext(DawContext);
   const { contextMenuViewState, leftState, topState, contextMenuGroupState } = useContext(ContextMenuContext);
+  const [focusing, setFocusing] = focusingTrackState;
   const [currentRatePosition] = curerntRatePositionState;
   const [pjt] = projectState;
   const [regions, setRegions] = useState([] as unknown as QueryDocumentSnapshot<RegionEntity>[]);
@@ -41,7 +43,7 @@ const Track: React.FC<ChannelProps> = (props) => {
     const startY = e.clientY;
     document.onmousemove = (e) => {
       setHeight(height + e.clientY - startY);
-      document.onmouseup = () => (document.onmousemove = () => {});
+      document.onmouseup = () => removeDocumentMouseUpMoveEvent();
     };
   };
   useEffect(() => {
@@ -87,10 +89,14 @@ const Track: React.FC<ChannelProps> = (props) => {
     ]);
     setViewContext(true);
   };
+  const passFocus = async () => {
+    setFocusing(track.id);
+    await contextFocus(`track-${track.id}`, projectRef, user);
+  };
   return (
     <TrackContext.Provider value={{ trackState, volumeState }}>
       <input
-        onClick={(e) => contextFocus(`track-${track.id}`, projectRef, user)}
+        onClick={(e) => passFocus()}
         type="radio"
         className="focusChecker"
         data-doc-type="track"

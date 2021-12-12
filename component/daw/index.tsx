@@ -56,7 +56,6 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const tracksColRef = getTracksColRef(projectRef);
   const collabColRef = getCollabColRef(projectRef);
   const [pjt, setPjt] = projectState;
-
   const [settingModalView, setSettingModalView] = settingModalViewState;
   /**スナップショットリスナー追加 */
   const attach = () => {
@@ -155,6 +154,7 @@ const DawProvider: React.FC<ProjectProp> = (props) => {
   const tracksState = useState([] as QueryDocumentSnapshot<TrackEntity>[]);
   const projectState = useState(project);
   const timeState = useState([0, 0, 0] as TimeSet);
+  const focusingTrackState = useState("");
   const curerntRatePositionState = useState(0);
   return (
     <DawContext.Provider
@@ -165,6 +165,7 @@ const DawProvider: React.FC<ProjectProp> = (props) => {
         playingState,
         user,
         tracksState,
+        focusingTrackState,
         projectState,
         projectRef: getProjectDocRef(getProjectsColRef(), project.id as string),
       }}

@@ -112,3 +112,8 @@ export async function contextFocus(targetId: string, projectRef: DocumentReferen
     displayName: user.displayName || "unknown",
   });
 }
+
+export function removeDocumentMouseUpMoveEvent() {
+  document.onmousemove = () => {};
+  document.onmouseup = () => {};
+}
