@@ -49,9 +49,9 @@ const Region: React.FC<Props> = ({ snapshot }) => {
     setCtx(audioContext);
   };
 
+  //ボリューム調整を反映
   useEffect(() => {
     if (audio) audio.volume = volume / 1000;
-    console.log(volume);
   }, [audio, volume]);
 
   /**再生 */
