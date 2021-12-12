@@ -1,6 +1,7 @@
 import { addDoc, deleteDoc, doc, onSnapshot, QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { getCollabColRef, getRegionColRef, getTracksColRef, RegionEntity, TrackEntity } from "../../../../firebase/model";
+import { contextFocus } from "../../../../utils";
 import { ContextMenuContext, DawContext } from "../../index";
 import TrackCtl from "./ctl";
 import Region from "./region";
@@ -84,8 +85,16 @@ const Track: React.FC<ChannelProps> = (props) => {
   };
   return (
     <>
-      <input type="radio" className="focusChecker" data-doc-type="track" id={`track-${track.id}`} name={`focusFor1`} ref={focuser} />
-      <div onClick={focus} className="channel focusTarget" style={{ height }} onContextMenu={callContext}>
+      <input
+        onClick={(e) => contextFocus(`track-${track.id}`, projectRef, user)}
+        type="radio"
+        className="focusChecker"
+        data-doc-type="track"
+        id={`track-${track.id}`}
+        name={`focusFor1`}
+        ref={focuser}
+      />
+      <label htmlFor={`track-${track.id}`} className="channel focusTarget" style={{ height }} onContextMenu={callContext}>
         <TrackCtl {...props} />
         <div className="board">
           {regions?.map?.((region, index) => (
@@ -99,7 +108,7 @@ const Track: React.FC<ChannelProps> = (props) => {
           <div className="playBar" style={{ left: currentRatePosition * 100 + "%" }}></div>
         </div>
         <div className="resizeBar bottom" onMouseDown={mouseDown}></div>
-      </div>
+      </label>
     </>
   );
 };

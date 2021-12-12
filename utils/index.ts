@@ -1,4 +1,8 @@
-import { ProjectEntity } from "../firebase/model";
+import { DocumentReference } from "@firebase/firestore";
+import { UserRecord } from "firebase-admin/lib/auth/user-record";
+import { doc, updateDoc } from "firebase/firestore";
+import React from "react";
+import { getCollabColRef, ProjectEntity } from "../firebase/model";
 
 /**プレインオブジェクトにする
  * @param src 対象
@@ -98,4 +102,13 @@ export class TimeContext {
     clearInterval(this.interval);
   }
   onTick(bar: number, count: number, ms: number, time: Date) {}
+}
+
+export async function contextFocus(targetId: string, projectRef: DocumentReference<ProjectEntity>, user: UserRecord): Promise<void> {
+  const colRef = getCollabColRef(projectRef);
+  const docRef2 = doc(colRef, user.uid);
+  updateDoc(docRef2, {
+    focusing: targetId,
+    displayName: user.displayName || "unknown",
+  });
 }
