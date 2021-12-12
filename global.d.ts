@@ -15,6 +15,7 @@ declare global {
   type State<S> = [S, Dispatch<SetStateAction<S>>];
 
   type TimeSet = [number, number, number];
+
   interface DawContext extends UserProps {
     /**プロジェクトの情報 */
     projectState: State<ProjectEntity>;
@@ -27,6 +28,7 @@ declare global {
     timeContextState: State<TimeContext>;
     curerntRatePositionState: State<number>;
   }
+
   /**モーダルの表示状態 */
   interface ModalViewContext {
     settingModalViewState: State<boolean>;
@@ -57,5 +59,10 @@ declare global {
     leftState: State<number>;
     topState: State<number>;
     contextMenuGroupState: State<ContextGroup[]>;
+  }
+
+  interface TrackContext {
+    trackState: State<TrackEntity>;
+    volumeState: State<number>;
   }
 }

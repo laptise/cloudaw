@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { TrackContext } from ".";
 
 /**トラックコントロール */
 const TrackCtl: React.FC<ChannelProps> = (props) => {
@@ -6,7 +7,8 @@ const TrackCtl: React.FC<ChannelProps> = (props) => {
   const { width, setWidth, track } = props;
   const startWidth = width;
   const { name, volume } = track.data();
-  const [currentVolume, setCurrentVolue] = useState(volume || 0);
+  const { volumeState } = useContext(TrackContext);
+  const [currentVolume, setCurrentVolue] = volumeState;
   const mouseDown = (e: React.MouseEvent) => {
     const startX = e.clientX;
     document.onmousemove = (e) => {

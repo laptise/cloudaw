@@ -1,10 +1,12 @@
 import { addDoc, deleteDoc, doc, onSnapshot, QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { getCollabColRef, getRegionColRef, getTracksColRef, RegionEntity, TrackEntity } from "../../../../firebase/model";
 import { contextFocus } from "../../../../utils";
 import { ContextMenuContext, DawContext } from "../../index";
 import TrackCtl from "./ctl";
 import Region from "./region";
+
+export const TrackContext = createContext<TrackContext>(null as any);
 
 /**トラック */
 const Track: React.FC<ChannelProps> = (props) => {
@@ -20,8 +22,10 @@ const Track: React.FC<ChannelProps> = (props) => {
   const [height, setHeight] = useState(80);
   const focuser = useRef<HTMLInputElement>(null);
   const { track } = props;
-
-  const { name } = track.data();
+  const data = track.data();
+  const { name, volume } = data;
+  const trackState = useState(data);
+  const volumeState = useState(volume);
   const focus = async () => {
     if (focuser.current) {
       focuser.current.checked = true;
@@ -84,7 +88,7 @@ const Track: React.FC<ChannelProps> = (props) => {
     setViewContext(true);
   };
   return (
-    <>
+    <TrackContext.Provider value={{ trackState, volumeState }}>
       <input
         onClick={(e) => contextFocus(`track-${track.id}`, projectRef, user)}
         type="radio"
@@ -109,7 +113,7 @@ const Track: React.FC<ChannelProps> = (props) => {
         </div>
         <div className="resizeBar bottom" onMouseDown={mouseDown}></div>
       </label>
-    </>
+    </TrackContext.Provider>
   );
 };
 

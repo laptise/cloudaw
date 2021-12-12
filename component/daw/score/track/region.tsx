@@ -1,5 +1,6 @@
 import { QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { TrackContext } from ".";
 import { DawContext } from "../..";
 import { RegionEntity } from "../../../../firebase/model";
 import { contextFocus, GlobFunctions } from "../../../../utils";
@@ -10,6 +11,9 @@ interface Props {
 
 const Region: React.FC<Props> = ({ snapshot }) => {
   const { projectState, projectRef, curerntRatePositionState, timeContextState, playingState, user } = useContext(DawContext);
+  const { trackState, volumeState } = useContext(TrackContext);
+  const [volume] = volumeState;
+  const [track] = trackState;
   const [time] = timeContextState;
   const [isPlaying] = playingState;
   const [current] = curerntRatePositionState;
@@ -22,6 +26,7 @@ const Region: React.FC<Props> = ({ snapshot }) => {
   const [width, setWidth] = useState(0);
   //リジョンのオーディオ
   const [audio, setAudio] = useState<HTMLAudioElement>(null as any);
+  const [ctx, setCtx] = useState<AudioContext>(null as any);
   //リジョンの再生状態
   const [regionPlaying, setRegionPlaying] = useState(false);
 
@@ -34,11 +39,27 @@ const Region: React.FC<Props> = ({ snapshot }) => {
     setLeft(rate);
   };
 
+  const initiate = () => {
+    const audioContext = new AudioContext();
+    const channel = audioContext.createMediaElementSource(audio);
+    const volume = audioContext.createGain();
+    volume.gain.value = 2;
+    channel.connect(volume);
+    volume.connect(audioContext.destination);
+    setCtx(audioContext);
+  };
+
+  useEffect(() => {
+    if (audio) audio.volume = volume / 1000;
+    console.log(volume);
+  }, [audio, volume]);
+
   /**再生 */
   const play = () => {
+    if (!ctx) initiate();
     if (regionPlaying) return;
-    setRegionPlaying(true);
     audio.play();
+    setRegionPlaying(true);
   };
 
   /**一時停止 */
