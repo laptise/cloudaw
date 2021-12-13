@@ -1,6 +1,7 @@
 import { collection, CollectionReference, doc, DocumentReference, FirestoreDataConverter } from "firebase/firestore";
 import { FireBase } from "..";
 import { toObject } from "../../utils";
+import { AudioNodeGenerator } from "../../utils/audioNodes";
 
 export function clone(src: any, target: any) {
   for (const [key] of Object.entries(src)) {
@@ -41,6 +42,7 @@ export class TrackEntity extends BaseEntity {
   name!: string;
   regions!: RegionEntity[];
   volume!: number;
+  nodes: AudioNodeGenerator.Generator[] = [];
 }
 
 export class RegionEntity extends BaseEntity {

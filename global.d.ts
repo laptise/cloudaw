@@ -2,6 +2,7 @@ import { DocumentReference, QueryDocumentSnapshot } from "@firebase/firestore";
 import { Dispatch, SetStateAction } from "react";
 import { ProjectEntity, TrackEntity } from "./firebase/model";
 import { TimeContext } from "./utils";
+import { AudioNodeGenerator } from "./utils/audioNodes";
 declare global {
   /**User included */
   interface UserProps {
@@ -65,5 +66,6 @@ declare global {
   interface TrackContext {
     trackState: State<TrackEntity>;
     volumeState: State<number>;
+    audioNodeGeneratorsState: State<AudioNodeGenerator.Generator[]>;
   }
 }

@@ -3,6 +3,7 @@ import { addDoc, deleteDoc, doc, DocumentReference, onSnapshot, QueryDocumentSna
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { getCollabColRef, getRegionColRef, getTracksColRef, ProjectEntity, RegionEntity, TrackEntity } from "../../../../firebase/model";
 import { contextFocus, removeDocumentMouseUpMoveEvent } from "../../../../utils";
+import { AudioNodeGenerator } from "../../../../utils/audioNodes";
 import { ContextMenuContext, DawContext } from "../../index";
 import TrackCtl from "./ctl";
 import Region from "./region";
@@ -12,14 +13,15 @@ export const TrackContext = createContext<TrackContext>(null as any);
 /**トラック */
 const Track: React.FC<ChannelProps> = (props) => {
   const { projectRef, user, projectState, curerntRatePositionState, focusingTrackState } = useContext(DawContext);
-  const { contextMenuViewState, leftState, topState, contextMenuGroupState } = useContext(ContextMenuContext);
   const [focusing, setFocusing] = focusingTrackState;
   const [currentRatePosition] = curerntRatePositionState;
   const [pjt] = projectState;
   const [regions, setRegions] = useState([] as unknown as QueryDocumentSnapshot<RegionEntity>[]);
+  const { contextMenuViewState, leftState, topState, contextMenuGroupState } = useContext(ContextMenuContext);
   const [ctxLeft, setCtxLeft] = leftState;
   const [ctxTop, setCtxTop] = topState;
   const [group, setGroup] = contextMenuGroupState;
+  const audioNodeGeneratorsState = useState<AudioNodeGenerator.Generator[]>([]);
   const [viewContext, setViewContext] = contextMenuViewState;
   const [height, setHeight] = useState(80);
   const focuser = useRef<HTMLInputElement>(null);
@@ -94,7 +96,7 @@ const Track: React.FC<ChannelProps> = (props) => {
     await contextFocus(`track-${track.id}`, projectRef, user);
   };
   return (
-    <TrackContext.Provider value={{ trackState, volumeState }}>
+    <TrackContext.Provider value={{ trackState, volumeState, audioNodeGeneratorsState }}>
       <input
         onClick={(e) => passFocus()}
         type="radio"
