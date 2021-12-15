@@ -4,6 +4,9 @@ import { ProjectEntity, TrackEntity } from "./firebase/model";
 import { TimeContext } from "./utils";
 import { AudioNodeGenerator } from "./utils/audioNodes";
 declare global {
+  interface HTMLMediaElement {
+    captureStream(): MediaStream;
+  }
   /**User included */
   interface UserProps {
     user: UserRecord;
@@ -16,6 +19,16 @@ declare global {
   type State<S> = [S, Dispatch<SetStateAction<S>>];
 
   type TimeSet = [number, number, number];
+
+  interface AudioContextSet {
+    id?: string;
+    ctx?: AudioContext;
+    audio?: HTMLAudioElement;
+  }
+
+  interface PlayContext {
+    contextsState: State<AudioContextSet[]>;
+  }
 
   interface DawContext extends UserProps {
     /**プロジェクトの情報 */
@@ -67,5 +80,6 @@ declare global {
     trackState: State<TrackEntity>;
     volumeState: State<number>;
     audioNodeGeneratorsState: State<AudioNodeGenerator.Generator[]>;
+    trackRef: QueryDocumentSnapshot<TrackEntity>;
   }
 }

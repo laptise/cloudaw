@@ -45,7 +45,7 @@ const Track: React.FC<ChannelProps> = (props) => {
     const startY = e.clientY;
     document.onmousemove = (e) => {
       setHeight(height + e.clientY - startY);
-      document.onmouseup = () => removeDocumentMouseUpMoveEvent();
+      document.onmouseup = removeDocumentMouseUpMoveEvent;
     };
   };
   useEffect(() => {
@@ -96,7 +96,7 @@ const Track: React.FC<ChannelProps> = (props) => {
     await contextFocus(`track-${track.id}`, projectRef, user);
   };
   return (
-    <TrackContext.Provider value={{ trackState, volumeState, audioNodeGeneratorsState }}>
+    <TrackContext.Provider value={{ trackRef: track, trackState, volumeState, audioNodeGeneratorsState }}>
       <input
         onClick={(e) => passFocus()}
         type="radio"

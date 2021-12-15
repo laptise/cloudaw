@@ -41,14 +41,20 @@ export class BaseEntity {
 export class TrackEntity extends BaseEntity {
   name!: string;
   regions!: RegionEntity[];
+  nodes!: NodeEntity[];
   volume!: number;
-  nodes: AudioNodeGenerator.Generator[] = [];
 }
 
 export class RegionEntity extends BaseEntity {
   src!: string;
   startAt!: Date;
   duration!: number;
+}
+
+export class NodeEntity extends BaseEntity {
+  nodeName!: string;
+  order!: number;
+  value!: number;
 }
 
 export class FocusEntity extends BaseEntity {
@@ -125,6 +131,8 @@ export const getTracksColRef = (docRef: DocumentReference<ProjectEntity>) =>
 
 export const getRegionColRef = (docRef: DocumentReference<TrackEntity>) =>
   collection(docRef, "regions").withConverter(dynamicConverter(RegionEntity));
+
+export const getNodeColRef = (docRef: DocumentReference<TrackEntity>) => collection(docRef, "nodes").withConverter(dynamicConverter(NodeEntity));
 
 export const getFocusColRef = (docRef: DocumentReference<ProjectEntity>) => collection(docRef, "focus").withConverter(dynamicConverter(FocusEntity));
 

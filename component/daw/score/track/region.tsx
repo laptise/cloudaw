@@ -1,9 +1,10 @@
-import { QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
+import { onSnapshot, QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { TrackContext } from ".";
 import { DawContext } from "../..";
-import { RegionEntity } from "../../../../firebase/model";
+import { getNodeColRef, NodeEntity, RegionEntity } from "../../../../firebase/model";
 import { contextFocus, GlobFunctions } from "../../../../utils";
+import { AudioNodeGenerator, NodeContext } from "../../../../utils/audioNodes";
 
 interface Props {
   snapshot: QueryDocumentSnapshot<RegionEntity>;
@@ -11,14 +12,15 @@ interface Props {
 
 const Region: React.FC<Props> = ({ snapshot }) => {
   const { projectState, projectRef, curerntRatePositionState, timeContextState, playingState, user } = useContext(DawContext);
-  const { trackState, volumeState } = useContext(TrackContext);
-  const [volume] = volumeState;
+  const { trackState, volumeState, trackRef } = useContext(TrackContext);
+  const [currentVolume] = volumeState;
   const [track] = trackState;
   const [time] = timeContextState;
   const [isPlaying] = playingState;
   const [current] = curerntRatePositionState;
   const [project] = projectState;
   const { startAt, src, duration } = snapshot.data();
+  const [nodes, setNodes] = useState<QueryDocumentSnapshot<NodeEntity>[]>([]);
   const focuser = useRef<HTMLInputElement>(null);
   //リジョンの左位置
   const [left, setLeft] = useState(0);
@@ -26,10 +28,14 @@ const Region: React.FC<Props> = ({ snapshot }) => {
   const [width, setWidth] = useState(0);
   //リジョンのオーディオ
   const [audio, setAudio] = useState<HTMLAudioElement>(null as any);
-  const [ctx, setCtx] = useState<AudioContext>(null as any);
+  const [buffer, setBuffer] = useState<AudioBuffer>();
+  const [srcNode, setSrcNode] = useState<AudioBufferSourceNode>();
+  const [volumeNode, setVolumeNode] = useState<GainNode>();
+  const [currentPosition, setCurrentPosition] = useState(0);
+  const [audioNodes, setAudioNodes] = useState<AudioNode[]>([]);
   //リジョンの再生状態
   const [regionPlaying, setRegionPlaying] = useState(false);
-
+  const [nodeStates, setNodeStates] = useState<NodeContext[]>([]);
   //リジョンの大きさ、位置を調整
   const setRegionLayout = () => {
     const runningTIme = GlobFunctions.getRunTime(project);
@@ -39,33 +45,59 @@ const Region: React.FC<Props> = ({ snapshot }) => {
     setLeft(rate);
   };
 
-  const initiate = () => {
-    const audioContext = new AudioContext();
-    const channel = audioContext.createMediaElementSource(audio);
-    const volume = audioContext.createGain();
-    volume.gain.value = 2;
-    channel.connect(volume);
-    volume.connect(audioContext.destination);
-    setCtx(audioContext);
+  const initiate = async () => {
+    const buffer = await fetch(src).then((res) => res.arrayBuffer().then((buffer) => new AudioContext().decodeAudioData(buffer)));
+    setBuffer(buffer);
   };
 
   //ボリューム調整を反映
   useEffect(() => {
-    if (audio) audio.volume = volume / 1000;
-  }, [audio, volume]);
+    if (volumeNode) volumeNode.gain.value = currentVolume / 1000;
+    // if (audio) audio.volume =
+  }, [audio, currentVolume]);
+
+  const buildAudio = () => {
+    if (!src || !buffer) throw new Error();
+    const ctx = new AudioContext();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const mapper = new AudioNodeGenerator.Mapper(ctx, source);
+    const contexts = mapper.chainAll(nodes.map((x) => x.data()));
+    contexts.forEach((c, index) => (c.id = nodes[index].id));
+    const volume = ctx.createGain();
+    volume.gain.value = currentVolume / 1000;
+    mapper.lastNode.connect(volume);
+    volume.connect(ctx.destination);
+    setNodeStates(contexts);
+    setVolumeNode(volume);
+    setSrcNode(source);
+    return source;
+  };
 
   /**再生 */
   const play = () => {
-    if (!ctx) initiate();
-    if (regionPlaying) return;
-    audio.play();
+    if (regionPlaying || !buffer) return;
+    const srcNode = buildAudio();
+    console.log(srcNode);
+    if (srcNode) {
+      srcNode.start(0, 5);
+    }
+    // src.onended = (e) => {
+    //   const target = e.currentTarget as AudioBufferSourceNode;
+    //   // console.log(target.context.currentTime);
+    //   // console.log(new Date(0));
+    //   // console.log(new Date(e.timeStamp));
+    //   setCurrentPosition(e.timeStamp);
+    //   // console.log(e);
+    // };
+    // connections();
     setRegionPlaying(true);
   };
 
   /**一時停止 */
   const pause = () => {
     if (!regionPlaying) return;
-    audio?.pause();
+    srcNode?.stop();
     setRegionPlaying(false);
   };
 
@@ -76,7 +108,7 @@ const Region: React.FC<Props> = ({ snapshot }) => {
     else setRegionPlaying(false);
   };
 
-  //プロジェクトの情報が変わるたびにリジョンを生成
+  // プロジェクトの情報が変わるたびにリジョンを生成
   useEffect(() => {
     setRegionLayout();
   }, [project]);
@@ -100,9 +132,32 @@ const Region: React.FC<Props> = ({ snapshot }) => {
 
   //初期表示としてaudioを格納
   useEffect(() => {
+    initiate();
+    const nodeColRef = getNodeColRef(trackRef.ref);
+    onSnapshot(nodeColRef, (snapshot) =>
+      snapshot.docChanges().forEach((change) => {
+        setNodes(snapshot.docs);
+      })
+    );
+    onSnapshot(trackRef.ref, (snapshot) => {});
     const audio = new Audio(src);
     setAudio(audio);
+    const detach = () => {
+      onSnapshot(nodeColRef, () => {});
+      onSnapshot(trackRef.ref, () => {});
+    };
+    return detach;
   }, []);
+
+  useEffect(() => {
+    nodes.forEach((node) => {
+      const target = nodeStates.find((x) => x.id === node.id);
+      if (target) {
+        target.value1 = node.data().value;
+      }
+    });
+    // console.log(src, regionPlaying, nodeStates);
+  }, [nodes, isPlaying]);
 
   /**リジョンの持ち上げ */
   const mouseDown = (e: React.MouseEvent) => {
@@ -140,6 +195,7 @@ const Region: React.FC<Props> = ({ snapshot }) => {
       <label
         htmlFor={`region-${snapshot.id}`}
         className="region focusTarget"
+        data-loading={!buffer}
         onMouseDown={mouseDown}
         style={{ left: left + "%", width: width + "%", zIndex: 1 }}
       >

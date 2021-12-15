@@ -1,21 +1,31 @@
+import { addDoc, deleteDoc, DocumentReference, getDocs, onSnapshot, QueryDocumentSnapshot, updateDoc } from "@firebase/firestore";
 import React, { useContext, useEffect, useState } from "react";
-import { ContextMenuContext, DawContext } from ".";
-import { TrackEntity } from "../../firebase/model";
-import { AudioNodeGenerator } from "../../utils/audioNodes";
+import { ContextMenuContext, DawContext } from "../.";
+import { getNodeColRef, NodeEntity, TrackEntity } from "../../../firebase/model";
+import { ContextMenuInit, defineContextMenu } from "../../../utils";
+import { AudioNodeGenerator } from "../../../utils/audioNodes";
+import NodeInfo from "./nodeInfo";
 
-const TrackInfo: React.FC<{ trackState: State<TrackEntity> }> = ({ trackState }) => {
+const TrackInfo: React.FC<{ track: QueryDocumentSnapshot<TrackEntity> }> = ({ track }) => {
   const { contextMenuViewState, leftState, topState, contextMenuGroupState } = useContext(ContextMenuContext);
+  const [viewContext, setViewContext] = contextMenuViewState;
   const [ctxLeft, setCtxLeft] = leftState;
   const [ctxTop, setCtxTop] = topState;
   const [group, setGroup] = contextMenuGroupState;
-  const [viewContext, setViewContext] = contextMenuViewState;
-  const [currentTrack, setCurrentTrack] = trackState;
-  const addGain = () => {
+  const { name } = track.data();
+  const [nodes, setNodes] = useState<QueryDocumentSnapshot<NodeEntity>[]>([]);
+  const addGain = async () => {
     const gen = new AudioNodeGenerator.Gain();
     gen.gain = 2;
-    currentTrack.nodes.push(gen);
-    console.log(gen);
+    const entity = gen.toEntity();
+    await addDoc(getNodeColRef(track.ref), entity);
   };
+  useEffect(() => {
+    onSnapshot(getNodeColRef(track.ref), (snapshot) => {
+      setNodes(snapshot.docs);
+    });
+  }, [track]);
+
   const callContext = (e: React.MouseEvent) => {
     setCtxLeft(e.clientX);
     setCtxTop(e.clientY);
@@ -28,6 +38,11 @@ const TrackInfo: React.FC<{ trackState: State<TrackEntity> }> = ({ trackState })
             disabled: false,
             action: () => addGain(),
           },
+          {
+            label: "Delay",
+            disabled: false,
+            action: () => {},
+          },
         ],
       },
     ]);
@@ -35,12 +50,10 @@ const TrackInfo: React.FC<{ trackState: State<TrackEntity> }> = ({ trackState })
   };
   return (
     <>
-      <span id="trackName">{currentTrack?.name}</span>
+      <span id="trackName">{name}</span>
       <div id="leftNodes">
-        {currentTrack?.nodes?.map((node, index) => (
-          <div className="singleNode" key={index}>
-            a
-          </div>
+        {nodes?.map((node, index) => (
+          <NodeInfo key={index} node={node} />
         ))}
         <div onClick={callContext} className="singleNode">
           新規追加
@@ -54,8 +67,8 @@ const LeftPannel: React.FC = () => {
   const { focusingTrackState, tracksState } = useContext(DawContext);
   const [tracks] = tracksState;
   const [focusing] = focusingTrackState;
-  const trackState = useState<TrackEntity>(null as any);
-  const [currentTrack, setCurrentTrack] = trackState;
+  const trackState = useState<QueryDocumentSnapshot<TrackEntity>>(null as any);
+  const [track, setTrack] = trackState;
   const [width, setWidth] = useState(120);
   const mouseDown = (e: React.MouseEvent) => {
     const startX = e.clientX;
@@ -64,14 +77,17 @@ const LeftPannel: React.FC = () => {
       document.onmouseup = () => (document.onmousemove = () => {});
     };
   };
+  //ユーザーが見てるものが変わる度
   useEffect(() => {
     const target = tracks.find((x) => x.id === focusing);
-    if (target) setCurrentTrack(target.data());
+    if (target) {
+      setTrack(target);
+    }
   }, [focusing]);
 
   return (
     <div id="leftPannel" style={{ width }}>
-      {currentTrack && <TrackInfo trackState={trackState} />}
+      {track && <TrackInfo track={track} />}
       <div className="resizeBar right" onMouseDown={mouseDown}></div>
     </div>
   );

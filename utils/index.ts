@@ -117,3 +117,14 @@ export function removeDocumentMouseUpMoveEvent() {
   document.onmousemove = () => {};
   document.onmouseup = () => {};
 }
+
+export class ContextMenuInit {
+  ctx: React.Context<ContextMenuContext>;
+  constructor(ctx: React.Context<ContextMenuContext>) {
+    this.ctx = ctx;
+  }
+  defineAndGet(groups: ContextGroup[]) {}
+}
+export function defineContextMenu() {
+  return (e: React.MouseEvent) => 1;
+}

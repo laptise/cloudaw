@@ -17,6 +17,7 @@ import { TimeContext } from "../../utils";
 export const DawContext = createContext<DawContext>(null as any);
 export const ModalViewContext = createContext<ModalViewContext>(null as any);
 export const ContextMenuContext = createContext<ContextMenuContext>(null as any);
+export const PlayContext = createContext<PlayContext>(null as any);
 
 /**他ユーザーのフォーカスを描画 */
 export function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnapshot<CollaboratorEntity>) {
@@ -47,6 +48,8 @@ export function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnap
 const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const { settingModalViewState } = useContext(ModalViewContext);
   const { projectState, tracksState, playingState, timeState, timeContextState, curerntRatePositionState } = useContext(DawContext);
+  const { contextsState } = useContext(PlayContext);
+  const [playState, setPlayState] = contextsState;
   const [currentPosition, setCurrentPosition] = curerntRatePositionState;
   const [timeContext, setTimeContext] = timeContextState;
   const [timeSet, setTimeSet] = timeState;
@@ -67,6 +70,12 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
       console.log("track");
       const [val, setVal] = tracksState;
       const tracks = snapshot.docs;
+      const contexts: AudioContextSet[] = tracks.map((track) => {
+        return {
+          id: track.id,
+        };
+      });
+      setPlayState(contexts);
       setVal(tracks);
     });
     onSnapshot(collabColRef, (snapshot) => {
@@ -112,6 +121,7 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
     };
     isPlaying ? timeContext.go() : timeContext.puase();
   }, [isPlaying, setIsPlaying]);
+
   return (
     <>
       <header onContextMenu={(e) => console.log(19878897)}>
@@ -156,6 +166,7 @@ const DawProvider: React.FC<ProjectProp> = (props) => {
   const timeState = useState([0, 0, 0] as TimeSet);
   const focusingTrackState = useState("");
   const curerntRatePositionState = useState(0);
+  const contextsState = useState<AudioContextSet[]>([]);
   return (
     <DawContext.Provider
       value={{
@@ -174,10 +185,12 @@ const DawProvider: React.FC<ProjectProp> = (props) => {
         <ContextMenuContext.Provider
           value={{ leftState, topState, contextMenuViewState: contextMenuViewState, contextMenuGroupState: conteextGroupState }}
         >
-          <ContextMenu />
-          <AddNewTrackModal />
-          <SettingModal />
-          <Daw {...props} />
+          <PlayContext.Provider value={{ contextsState }}>
+            <ContextMenu />
+            <AddNewTrackModal />
+            <SettingModal />
+            <Daw {...props} />
+          </PlayContext.Provider>
         </ContextMenuContext.Provider>
       </ModalViewContext.Provider>
     </DawContext.Provider>
