@@ -2,6 +2,7 @@ import { NodeEntity } from "../firebase/model";
 
 function constructNodeController(v: AudioNode) {
   if (v instanceof GainNode) return new GainNodeContext(v);
+  else if (v instanceof DelayNode) return new DelayNodeContext(v);
   else throw new Error("invalid AudioNode");
 }
 
@@ -30,6 +31,17 @@ class GainNodeContext extends NodeContext {
   }
 }
 
+class DelayNodeContext extends NodeContext {
+  node!: DelayNode;
+
+  get value1() {
+    return this.node.delayTime.value;
+  }
+  set value1(v) {
+    this.node.delayTime.value = v;
+  }
+}
+
 export namespace AudioNodeGenerator {
   export class Mapper {
     connected: AudioNode[] = [];
@@ -51,9 +63,18 @@ export namespace AudioNodeGenerator {
       switch (nodeEntity.nodeName) {
         case "Gain":
           return this.connectAsGain(nodeEntity);
+        case "Delay":
+          return this.connectAsDelay(nodeEntity);
         default:
           throw new Error("invalid node");
       }
+    }
+    private connectAsDelay(nodeEntity: NodeEntity) {
+      const node = this.ctx.createDelay();
+      node.delayTime.value = nodeEntity.value;
+      this.lastNode.connect(node);
+      this.lastNode = node;
+      return node;
     }
     private connectAsGain(nodeEntity: NodeEntity) {
       const node = this.ctx.createGain();
@@ -88,6 +109,28 @@ export namespace AudioNodeGenerator {
       const entity = new NodeEntity();
       entity.nodeName = this.nodeName;
       entity.value = this.gain;
+      return entity;
+    }
+  }
+
+  export class Delay extends Generator {
+    nodeName = "Delay";
+    private _delay!: number;
+    get delay() {
+      return this._delay;
+    }
+    set delay(v) {
+      this._delay = v;
+    }
+    instance(ctx: AudioContext) {
+      const gainNode = ctx.createDelay();
+      // gainNode.delayTime.value = this.gain;
+      return gainNode;
+    }
+    toEntity() {
+      const entity = new NodeEntity();
+      entity.nodeName = this.nodeName;
+      // entity.value = this.gain;
       return entity;
     }
   }

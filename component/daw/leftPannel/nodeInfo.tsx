@@ -2,6 +2,7 @@ import { deleteDoc, QueryDocumentSnapshot } from "firebase/firestore";
 import React, { useContext, useState } from "react";
 import { ContextMenuContext } from "..";
 import { NodeEntity } from "../../../firebase/model";
+import DelayModal from "./nodeCtlModals/delayModal";
 import GainModal from "./nodeCtlModals/gainModal";
 
 const NodeInfo: React.FC<{ node: QueryDocumentSnapshot<NodeEntity> }> = ({ node }) => {
@@ -37,6 +38,8 @@ const NodeInfo: React.FC<{ node: QueryDocumentSnapshot<NodeEntity> }> = ({ node 
     switch (nodeName) {
       case "Gain":
         return GainModal;
+      case "Delay":
+        return DelayModal;
       default:
         throw new Error();
     }

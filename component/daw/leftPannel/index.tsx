@@ -14,12 +14,21 @@ const TrackInfo: React.FC<{ track: QueryDocumentSnapshot<TrackEntity> }> = ({ tr
   const [group, setGroup] = contextMenuGroupState;
   const { name } = track.data();
   const [nodes, setNodes] = useState<QueryDocumentSnapshot<NodeEntity>[]>([]);
+
   const addGain = async () => {
     const gen = new AudioNodeGenerator.Gain();
     gen.gain = 2;
     const entity = gen.toEntity();
     await addDoc(getNodeColRef(track.ref), entity);
   };
+
+  const addDelay = async () => {
+    const gen = new AudioNodeGenerator.Delay();
+    gen.delay = 0.5;
+    const entity = gen.toEntity();
+    await addDoc(getNodeColRef(track.ref), entity);
+  };
+
   useEffect(() => {
     onSnapshot(getNodeColRef(track.ref), (snapshot) => {
       setNodes(snapshot.docs);
@@ -41,7 +50,7 @@ const TrackInfo: React.FC<{ track: QueryDocumentSnapshot<TrackEntity> }> = ({ tr
           {
             label: "Delay",
             disabled: false,
-            action: () => {},
+            action: () => addDelay(),
           },
         ],
       },
