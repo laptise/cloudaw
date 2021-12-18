@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { FlexRow } from "../flexBox";
 import Head from "next/head";
 import TopPannel from "./topPannel";
@@ -47,7 +47,9 @@ export function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnap
 
 const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const { settingModalViewState } = useContext(ModalViewContext);
-  const { projectState, tracksState, playingState, timeState, timeContextState, curerntRatePositionState } = useContext(DawContext);
+  const { projectState, onPlayFireState, tracksState, playingState, timeState, timeContextState, curerntRatePositionState, dispatcher } =
+    useContext(DawContext);
+  const [onPlayFire] = onPlayFireState;
   const { contextsState } = useContext(PlayContext);
   const [playState, setPlayState] = contextsState;
   const [currentPosition, setCurrentPosition] = curerntRatePositionState;
@@ -60,6 +62,7 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const collabColRef = getCollabColRef(projectRef);
   const [pjt, setPjt] = projectState;
   const [settingModalView, setSettingModalView] = settingModalViewState;
+  const topContext = useRef<AudioContext>();
   /**スナップショットリスナー追加 */
   const attach = () => {
     onSnapshot(projectRef, (doc) => {
@@ -97,6 +100,43 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
     onSnapshot(tracksColRef, () => {});
     onSnapshot(collabColRef, () => {});
   };
+  const play = async () => {
+    const unPack = onPlayFire;
+
+    console.log(unPack);
+    // const res = await onPlayFire();
+    // console.log(res);
+    const file = await fetch("/a1.wav").then((res) => res.arrayBuffer());
+    const file2 = await fetch("/el.wav").then((res) => res.arrayBuffer());
+    const ctx = topContext.current;
+    if (!ctx) throw new Error();
+    const buf = ctx.createBufferSource();
+    buf.buffer = await ctx.decodeAudioData(file);
+    const buf2 = ctx.createBufferSource();
+    buf2.buffer = await ctx.decodeAudioData(file2);
+    buf.connect(ctx.destination);
+    buf2.connect(ctx.destination);
+    const frameCount = ctx.sampleRate * 2.0;
+    const newBuf = ctx.createBuffer(1, frameCount, ctx.sampleRate);
+    const datat = newBuf.getChannelData(0);
+    const src = buf.buffer.getChannelData(0);
+    datat.forEach((_, index) => {
+      datat[index] = src[index];
+    });
+    const newSmapl = ctx.createBufferSource();
+    newSmapl.buffer = newBuf;
+    newSmapl.connect(ctx.destination);
+    newSmapl.start();
+    console.log(datat);
+    console.log(newBuf);
+    // buf.start(0);
+    // buf2.start(0);
+  };
+  useEffect(() => {
+    if (isPlaying) {
+      play();
+    }
+  }, [isPlaying]);
 
   const keyBind = () => {
     document.onkeydown = (e) => {
@@ -106,6 +146,7 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
     };
   };
   useEffect(() => {
+    topContext.current = new AudioContext();
     attach();
     return detach;
   }, []);
@@ -167,9 +208,15 @@ const DawProvider: React.FC<ProjectProp> = (props) => {
   const focusingTrackState = useState("");
   const curerntRatePositionState = useState(0);
   const contextsState = useState<AudioContextSet[]>([]);
+  const onPlayFireState = useState<() => Promise<string>>(null as any);
+  const dispatcher = () => "hello";
+  const onPlayFire = async () => {};
   return (
     <DawContext.Provider
       value={{
+        trackInfo: {},
+        onPlayFireState,
+        dispatcher,
         curerntRatePositionState,
         timeContextState,
         timeState,

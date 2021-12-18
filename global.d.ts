@@ -30,6 +30,9 @@ declare global {
     contextsState: State<AudioContextSet[]>;
   }
 
+  interface TrackInfo {
+    [string]: any;
+  }
   interface DawContext extends UserProps {
     /**プロジェクトの情報 */
     projectState: State<ProjectEntity>;
@@ -42,6 +45,9 @@ declare global {
     timeContextState: State<TimeContext>;
     curerntRatePositionState: State<number>;
     focusingTrackState: State<string>;
+    dispatcher: () => string;
+    onPlayFireState: State<() => Promise<string>>;
+    trackInfo: TrackInfo;
   }
 
   /**モーダルの表示状態 */

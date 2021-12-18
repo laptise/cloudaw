@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { getAuth } from "@firebase/auth";
 import { getFirestore } from "@firebase/firestore";
+import { getStorage } from "@firebase/storage";
 import { getApp, initializeApp } from "firebase/app";
 
 const firebaseConfig = {
@@ -27,5 +28,9 @@ export namespace FireBase {
   export function fireStore() {
     init();
     return getFirestore();
+  }
+  export function storage() {
+    init();
+    return getStorage();
   }
 }

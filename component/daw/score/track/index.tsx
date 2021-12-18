@@ -12,7 +12,8 @@ export const TrackContext = createContext<TrackContext>(null as any);
 
 /**トラック */
 const Track: React.FC<ChannelProps> = (props) => {
-  const { projectRef, user, projectState, curerntRatePositionState, focusingTrackState } = useContext(DawContext);
+  const { projectRef, user, projectState, curerntRatePositionState, focusingTrackState, trackInfo, playingState } = useContext(DawContext);
+  const [playing] = playingState;
   const [focusing, setFocusing] = focusingTrackState;
   const [currentRatePosition] = curerntRatePositionState;
   const [pjt] = projectState;

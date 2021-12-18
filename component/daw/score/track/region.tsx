@@ -1,8 +1,12 @@
+import { ref, getBlob } from "@firebase/storage";
+import { storage } from "firebase-admin";
 import { onSnapshot, QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { TrackContext } from ".";
 import { DawContext } from "../..";
-import { getNodeColRef, NodeEntity, RegionEntity } from "../../../../firebase/model";
+import { db } from "../../../../db";
+import { FireBase } from "../../../../firebase";
+import { getNodeColRef, getProjectWavsRef, NodeEntity, RegionEntity } from "../../../../firebase/model";
 import { contextFocus, GlobFunctions } from "../../../../utils";
 import { AudioNodeGenerator, NodeContext } from "../../../../utils/audioNodes";
 
@@ -33,6 +37,7 @@ const Region: React.FC<Props> = ({ snapshot }) => {
   const [volumeNode, setVolumeNode] = useState<GainNode>();
   const [currentPosition, setCurrentPosition] = useState(0);
   const [audioNodes, setAudioNodes] = useState<AudioNode[]>([]);
+  const audioContext = useRef<AudioContext>();
   //リジョンの再生状態
   const [regionPlaying, setRegionPlaying] = useState(false);
   const [nodeStates, setNodeStates] = useState<NodeContext[]>([]);
@@ -46,7 +51,23 @@ const Region: React.FC<Props> = ({ snapshot }) => {
   };
 
   const initiate = async () => {
-    const buffer = await fetch(src).then((res) => res.arrayBuffer().then((buffer) => new AudioContext().decodeAudioData(buffer)));
+    const arrayBuffer = await (async () => {
+      const item = await db.wavs.get(snapshot.id);
+      if (item?.buffer) {
+        return item.buffer;
+      } else {
+        const buffer = await (await getBlob(ref(getProjectWavsRef(projectRef), src))).arrayBuffer();
+        db.wavs.put({
+          projectId: projectRef.id,
+          name: src,
+          id: snapshot.id,
+          buffer,
+          timeStamp: new Date(),
+        });
+        return buffer;
+      }
+    })();
+    const buffer = await new AudioContext().decodeAudioData(arrayBuffer);
     setBuffer(buffer);
   };
 
@@ -58,7 +79,8 @@ const Region: React.FC<Props> = ({ snapshot }) => {
 
   const buildAudio = () => {
     if (!src || !buffer) throw new Error();
-    const ctx = new AudioContext();
+    audioContext.current = new AudioContext();
+    const ctx = audioContext.current;
     const source = ctx.createBufferSource();
     source.buffer = buffer;
     const mapper = new AudioNodeGenerator.Mapper(ctx, source);

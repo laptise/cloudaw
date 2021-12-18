@@ -2,7 +2,7 @@ import { collection, CollectionReference, doc, DocumentReference, FirestoreDataC
 import { FireBase } from "..";
 import { toObject } from "../../utils";
 import { AudioNodeGenerator } from "../../utils/audioNodes";
-
+import { ref } from "firebase/storage";
 export function clone(src: any, target: any) {
   for (const [key] of Object.entries(src)) {
     setValue(key, src, target);
@@ -137,3 +137,5 @@ export const getNodeColRef = (docRef: DocumentReference<TrackEntity>) => collect
 export const getFocusColRef = (docRef: DocumentReference<ProjectEntity>) => collection(docRef, "focus").withConverter(dynamicConverter(FocusEntity));
 
 export const getFocusDocRef = (colRef: CollectionReference<FocusEntity>, uid: string) => doc(colRef, uid);
+
+export const getProjectWavsRef = (docRef: DocumentReference<ProjectEntity>) => ref(FireBase.storage(), `projects/${docRef.id}`);

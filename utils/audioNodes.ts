@@ -124,6 +124,7 @@ export namespace AudioNodeGenerator {
     }
     instance(ctx: AudioContext) {
       const gainNode = ctx.createDelay();
+      const split = ctx.createChannelSplitter(2);
       // gainNode.delayTime.value = this.gain;
       return gainNode;
     }
@@ -135,3 +136,5 @@ export namespace AudioNodeGenerator {
     }
   }
 }
+
+export async function getSource(buffer: AudioBuffer) {}
