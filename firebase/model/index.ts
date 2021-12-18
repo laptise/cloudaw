@@ -47,8 +47,10 @@ export class TrackEntity extends BaseEntity {
 
 export class RegionEntity extends BaseEntity {
   src!: string;
-  startAt!: Date;
+  startAt!: number;
   duration!: number;
+  timestamp!: Date;
+  metastamp!: Date;
 }
 
 export class NodeEntity extends BaseEntity {

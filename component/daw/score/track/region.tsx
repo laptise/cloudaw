@@ -1,6 +1,8 @@
 import { ref, getBlob } from "@firebase/storage";
+import { faCheckCircle, faDownload, faQuestion, faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { storage } from "firebase-admin";
-import { onSnapshot, QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
+import { getDoc, onSnapshot, QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { TrackContext } from ".";
 import { DawContext } from "../..";
@@ -9,9 +11,17 @@ import { FireBase } from "../../../../firebase";
 import { getNodeColRef, getProjectWavsRef, NodeEntity, RegionEntity } from "../../../../firebase/model";
 import { contextFocus, GlobFunctions } from "../../../../utils";
 import { AudioNodeGenerator, NodeContext } from "../../../../utils/audioNodes";
+import { AudioManager } from "../../../../utils/audioStore";
+import { FlexCol, FlexRow } from "../../../flexBox";
 
 interface Props {
   snapshot: QueryDocumentSnapshot<RegionEntity>;
+}
+
+enum RegionLocalUpdateState {
+  onTime,
+  updateNeeded,
+  unknown,
 }
 
 const Region: React.FC<Props> = ({ snapshot }) => {
@@ -23,7 +33,7 @@ const Region: React.FC<Props> = ({ snapshot }) => {
   const [isPlaying] = playingState;
   const [current] = curerntRatePositionState;
   const [project] = projectState;
-  const { startAt, src, duration } = snapshot.data();
+  const { startAt, src, duration, timestamp, metastamp } = snapshot.data();
   const [nodes, setNodes] = useState<QueryDocumentSnapshot<NodeEntity>[]>([]);
   const focuser = useRef<HTMLInputElement>(null);
   //リジョンの左位置
@@ -35,12 +45,10 @@ const Region: React.FC<Props> = ({ snapshot }) => {
   const [buffer, setBuffer] = useState<AudioBuffer>();
   const [srcNode, setSrcNode] = useState<AudioBufferSourceNode>();
   const [volumeNode, setVolumeNode] = useState<GainNode>();
-  const [currentPosition, setCurrentPosition] = useState(0);
-  const [audioNodes, setAudioNodes] = useState<AudioNode[]>([]);
-  const audioContext = useRef<AudioContext>();
+  const [updateState, setUpdateState] = useState(RegionLocalUpdateState.unknown);
   //リジョンの再生状態
-  const [regionPlaying, setRegionPlaying] = useState(false);
   const [nodeStates, setNodeStates] = useState<NodeContext[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   //リジョンの大きさ、位置を調整
   const setRegionLayout = () => {
     const runningTIme = GlobFunctions.getRunTime(project);
@@ -50,125 +58,122 @@ const Region: React.FC<Props> = ({ snapshot }) => {
     setLeft(rate);
   };
 
-  const initiate = async () => {
-    const arrayBuffer = await (async () => {
+  const fetchWav = async () => {
+    const wav = await (async () => {
       const item = await db.wavs.get(snapshot.id);
-      if (item?.buffer) {
-        return item.buffer;
-      } else {
-        const buffer = await (await getBlob(ref(getProjectWavsRef(projectRef), src))).arrayBuffer();
-        db.wavs.put({
+      const needHardFetch = !item || item.timestamp?.valueOf() !== timestamp.valueOf();
+      const needMetaUpdate = !needHardFetch && item.metastamp?.valueOf() !== metastamp.valueOf();
+      const getData = async () => {
+        const newSnapshot = await getDoc(snapshot.ref);
+        const data = newSnapshot.data();
+        if (!newSnapshot || !data) throw new Error();
+        const { metastamp, timestamp, duration, startAt } = data;
+        const newItem = {
           projectId: projectRef.id,
           name: src,
-          id: snapshot.id,
-          buffer,
-          timeStamp: new Date(),
-        });
-        return buffer;
+          id: newSnapshot.id,
+          duration,
+          startAt,
+          timestamp,
+          trackId: trackRef.id,
+          metastamp,
+        };
+        return newItem;
+      };
+      if (needHardFetch) {
+        setUpdateState(RegionLocalUpdateState.updateNeeded);
+        const buffer = await (await getBlob(ref(getProjectWavsRef(projectRef), src))).arrayBuffer();
+        const entity = await getData();
+        const newItem = { ...entity, ...{ buffer } };
+        db.wavs.put(newItem);
+        setUpdateState(RegionLocalUpdateState.onTime);
+        return newItem;
+      } else if (needMetaUpdate) {
+        const entity = await getData();
+        const newItem = { ...entity };
+        db.wavs.update(newItem.id, newItem);
+        return item;
+      } else {
+        setUpdateState(RegionLocalUpdateState.onTime);
+        return item;
       }
     })();
+    const arrayBuffer = wav.buffer;
     const buffer = await new AudioContext().decodeAudioData(arrayBuffer);
-    setBuffer(buffer);
+    const processor = new AudioManager(project.bpm, 44100).processor;
+    const start = processor.samplePerMilliSecond * wav.startAt;
+    const duration = processor.samplePerMilliSecond * wav.duration;
+    const end = start + duration;
+    const ab = buffer.getChannelData(0);
+    const sliced = ab.slice(start, end);
+    const peaks = getPeaks(sliced);
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (canvas && ctx) {
+      const barMargin = 0;
+      const barWidth = canvas.width / peaks.length - barMargin;
+      const canvasH = canvas.height;
+      const halfCanvasH = canvasH / 2;
+      ctx.fillStyle = "white";
+      let sample;
+      let barHeight;
+      for (let i = 0, len = peaks.length; i < len; i++) {
+        //ch1
+        sample = peaks[i];
+        barHeight = sample * halfCanvasH;
+        ctx.fillRect(i * (barWidth + barMargin), halfCanvasH - barHeight, barWidth, barHeight);
+
+        //ch2
+        sample = peaks[i];
+        barHeight = sample * halfCanvasH;
+        ctx.fillRect(i * (barWidth + barMargin), halfCanvasH, barWidth, barHeight);
+      }
+      setBuffer(buffer);
+    }
   };
+  function getPeaks(array: Float32Array, peakLength = 2000) {
+    let step;
+    if (!peakLength) {
+      peakLength = 9000;
+    }
+    step = Math.floor(array.length / peakLength);
+    if (step < 1) {
+      step = 1;
+    }
+    let peaks = [];
+    for (let i = 0, len = array.length; i < len; i += step) {
+      const peak = getPeak(array, i, i + step);
+      peaks.push(peak);
+    }
+    return peaks;
+  }
+  function getPeak(array: Float32Array, startIndex: number, endIndex: number) {
+    const sliced = array.slice(startIndex, endIndex);
+    let peak = -100;
+    for (let i = 0, len = sliced.length; i < len; i++) {
+      const sample = sliced[i];
+      if (sample > peak) {
+        peak = sample;
+      }
+    }
+    return peak;
+  }
 
   //ボリューム調整を反映
   useEffect(() => {
     if (volumeNode) volumeNode.gain.value = currentVolume / 1000;
-    // if (audio) audio.volume =
   }, [audio, currentVolume]);
-
-  const buildAudio = () => {
-    if (!src || !buffer) throw new Error();
-    audioContext.current = new AudioContext();
-    const ctx = audioContext.current;
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    const mapper = new AudioNodeGenerator.Mapper(ctx, source);
-    const contexts = mapper.chainAll(nodes.map((x) => x.data()));
-    contexts.forEach((c, index) => (c.id = nodes[index].id));
-    const volume = ctx.createGain();
-    volume.gain.value = currentVolume / 1000;
-    mapper.lastNode.connect(volume);
-    volume.connect(ctx.destination);
-    setNodeStates(contexts);
-    setVolumeNode(volume);
-    setSrcNode(source);
-    return source;
-  };
-
-  /**再生 */
-  const play = () => {
-    if (regionPlaying || !buffer) return;
-    const srcNode = buildAudio();
-    console.log(srcNode);
-    if (srcNode) {
-      srcNode.start(0, 5);
-    }
-    // src.onended = (e) => {
-    //   const target = e.currentTarget as AudioBufferSourceNode;
-    //   // console.log(target.context.currentTime);
-    //   // console.log(new Date(0));
-    //   // console.log(new Date(e.timeStamp));
-    //   setCurrentPosition(e.timeStamp);
-    //   // console.log(e);
-    // };
-    // connections();
-    setRegionPlaying(true);
-  };
-
-  /**一時停止 */
-  const pause = () => {
-    if (!regionPlaying) return;
-    srcNode?.stop();
-    setRegionPlaying(false);
-  };
-
-  /**停止 */
-  const stop = () => {
-    if (audio) audio.currentTime = 0;
-    if (!regionPlaying) return;
-    else setRegionPlaying(false);
-  };
-
+  useEffect(() => {
+    fetchWav();
+  }, [snapshot]);
   // プロジェクトの情報が変わるたびにリジョンを生成
   useEffect(() => {
     setRegionLayout();
   }, [project]);
 
-  //再生ヘッダーの移動のたびにオーディオの再生をコントロール
-  useEffect(() => {
-    const start = startAt.valueOf();
-    const current = time.time.valueOf();
-    const end = start + duration;
-    if (!isPlaying) {
-      if (current <= end && start <= current) pause();
-      if (current === 0) stop();
-    }
-    if (isPlaying) {
-      if (start <= current && current <= end) {
-        //再生ヘッダーがリジョン内なら再生
-        play();
-      } else pause();
-    }
-  }, [current, isPlaying]);
-
   //初期表示としてaudioを格納
   useEffect(() => {
-    initiate();
-    const nodeColRef = getNodeColRef(trackRef.ref);
-    onSnapshot(nodeColRef, (snapshot) =>
-      snapshot.docChanges().forEach((change) => {
-        setNodes(snapshot.docs);
-      })
-    );
-    onSnapshot(trackRef.ref, (snapshot) => {});
-    const audio = new Audio(src);
-    setAudio(audio);
-    const detach = () => {
-      onSnapshot(nodeColRef, () => {});
-      onSnapshot(trackRef.ref, () => {});
-    };
-    return detach;
+    fetchWav();
   }, []);
 
   useEffect(() => {
@@ -200,7 +205,7 @@ const Region: React.FC<Props> = ({ snapshot }) => {
       const runTime = GlobFunctions.getRunTime(project);
       const newRate = newLeftRate / 100;
       const startAt = Math.floor(runTime * newRate);
-      await updateDoc(snapshot.ref, { startAt: startAt < 0 ? 0 : startAt });
+      await updateDoc(snapshot.ref, { startAt: startAt < 0 ? 0 : startAt, metastamp: new Date() });
     };
   };
   return (
@@ -221,7 +226,22 @@ const Region: React.FC<Props> = ({ snapshot }) => {
         onMouseDown={mouseDown}
         style={{ left: left + "%", width: width + "%", zIndex: 1 }}
       >
-        {src}
+        <FlexCol style={{ fontSize: 11, gap: 5 }}>
+          <FlexRow style={{ fontSize: 11 }}>
+            {updateState === RegionLocalUpdateState.updateNeeded && (
+              <button>
+                <FontAwesomeIcon icon={faDownload} />
+              </button>
+            )}
+            {updateState === RegionLocalUpdateState.onTime && (
+              <button title="リジョンは最新です">
+                <FontAwesomeIcon icon={faCheckCircle} />
+              </button>
+            )}
+          </FlexRow>
+          <canvas width={4000} ref={canvasRef}></canvas>
+          {src}
+        </FlexCol>
       </label>
     </>
   );

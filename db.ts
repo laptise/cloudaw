@@ -6,7 +6,11 @@ export interface Wav {
   id: string;
   projectId: string;
   buffer: ArrayBuffer;
-  timeStamp: Date;
+  duration: number;
+  startAt: number;
+  timestamp: Date;
+  metastamp: Date;
+  trackId: string;
 }
 
 export class MySubClassedDexie extends Dexie {
@@ -17,7 +21,7 @@ export class MySubClassedDexie extends Dexie {
   constructor() {
     super("wavs");
     this.version(1).stores({
-      wavs: "id, projectId", // Primary key and indexed props
+      wavs: "id, projectId, [projectId+trackId]", // Primary key and indexed props
     });
   }
 }

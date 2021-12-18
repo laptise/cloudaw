@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction } from "react";
 import { ProjectEntity, TrackEntity } from "./firebase/model";
 import { TimeContext } from "./utils";
 import { AudioNodeGenerator } from "./utils/audioNodes";
+import { AudioManager } from "./utils/audioStore";
 declare global {
   interface HTMLMediaElement {
     captureStream(): MediaStream;

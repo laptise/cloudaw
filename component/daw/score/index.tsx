@@ -26,11 +26,7 @@ const Score: React.FC = (props) => {
   const [trackList] = tracksState;
   const [dispatcherList, setDispatcherList] = useState<State<() => any>[]>();
   const [width, setCtlWidth] = useState(200);
-  const dss = useState<() => any>(() => true);
 
-  useEffect(() => {
-    console.log(trackInfo);
-  }, [trackInfo]);
   return (
     <div id="scores">
       <ScoreTool {...props} />

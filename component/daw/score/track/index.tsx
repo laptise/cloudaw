@@ -51,7 +51,7 @@ const Track: React.FC<ChannelProps> = (props) => {
   };
   useEffect(() => {
     const ref = getRegionColRef(track.ref);
-    onSnapshot(ref, (snapshot) => {
+    return onSnapshot(ref, (snapshot) => {
       const docs = snapshot.docs;
       setRegions(docs);
     });

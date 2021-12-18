@@ -13,6 +13,8 @@ import LeftPannel from "./leftPannel";
 import { CollaboratorEntity, getCollabColRef, getProjectDocRef, getProjectsColRef, getTracksColRef, TrackEntity } from "../../firebase/model";
 import ContextMenu from "./contextMenu";
 import { TimeContext } from "../../utils";
+import { db } from "../../db";
+import { AudioManager } from "../../utils/audioStore";
 
 export const DawContext = createContext<DawContext>(null as any);
 export const ModalViewContext = createContext<ModalViewContext>(null as any);
@@ -49,6 +51,7 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const { settingModalViewState } = useContext(ModalViewContext);
   const { projectState, onPlayFireState, tracksState, playingState, timeState, timeContextState, curerntRatePositionState, dispatcher } =
     useContext(DawContext);
+  const [tracks] = tracksState;
   const [onPlayFire] = onPlayFireState;
   const { contextsState } = useContext(PlayContext);
   const [playState, setPlayState] = contextsState;
@@ -58,85 +61,65 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const [isPlaying, setIsPlaying] = playingState;
   const projectColRef = getProjectsColRef();
   const projectRef = doc(projectColRef, project.id as string);
+  const [bpm, setBpm] = useState(0);
   const tracksColRef = getTracksColRef(projectRef);
   const collabColRef = getCollabColRef(projectRef);
   const [pjt, setPjt] = projectState;
   const [settingModalView, setSettingModalView] = settingModalViewState;
-  const topContext = useRef<AudioContext>();
+  const [audioManager, setAudioManager] = useState<AudioManager>();
   /**スナップショットリスナー追加 */
-  const attach = () => {
-    onSnapshot(projectRef, (doc) => {
-      const data = doc.data();
-      if (data) setPjt(data);
-    });
-    onSnapshot(tracksColRef, (snapshot) => {
-      console.log("track");
-      const [val, setVal] = tracksState;
-      const tracks = snapshot.docs;
-      const contexts: AudioContextSet[] = tracks.map((track) => {
-        return {
-          id: track.id,
-        };
-      });
-      setPlayState(contexts);
-      setVal(tracks);
-    });
-    onSnapshot(collabColRef, (snapshot) => {
-      snapshot.docs
-        .filter((doc) => {
-          return doc.id != user.uid;
-        })
-        .forEach((snapshot) => {
-          const x = snapshot.data();
-          const target = document.querySelector<HTMLInputElement>(`#${x.focusing}`);
-          target && snapshot.id && setFocusTarget(target, snapshot);
+  const snapshotEvent = () => {
+    const unsubscriber = [
+      onSnapshot(projectRef, (doc) => {
+        const data = doc.data();
+        console.log(11888);
+        if (data) {
+          setPjt(data);
+          setBpm(data.bpm);
+        }
+      }),
+      onSnapshot(tracksColRef, (snapshot) => {
+        const [val, setVal] = tracksState;
+        const tracks = snapshot.docs;
+        const contexts: AudioContextSet[] = tracks.map((track) => {
+          return {
+            id: track.id,
+          };
         });
-    });
+        setPlayState(contexts);
+        setVal(tracks);
+      }),
+      onSnapshot(collabColRef, (snapshot) => {
+        snapshot.docs
+          .filter((doc) => {
+            return doc.id != user.uid;
+          })
+          .forEach((snapshot) => {
+            const x = snapshot.data();
+            const target = document.querySelector<HTMLInputElement>(`#${x.focusing}`);
+            target && snapshot.id && setFocusTarget(target, snapshot);
+          });
+      }),
+    ];
+    return () => unsubscriber.forEach((fn) => fn());
   };
   useEffect(() => {}, [pjt]);
-  /**スナップショットリスナー解除 */
-  const detach = () => {
-    onSnapshot(projectRef, () => {});
-    onSnapshot(tracksColRef, () => {});
-    onSnapshot(collabColRef, () => {});
-  };
   const play = async () => {
-    const unPack = onPlayFire;
-
-    console.log(unPack);
-    // const res = await onPlayFire();
-    // console.log(res);
-    const file = await fetch("/a1.wav").then((res) => res.arrayBuffer());
-    const file2 = await fetch("/el.wav").then((res) => res.arrayBuffer());
-    const ctx = topContext.current;
-    if (!ctx) throw new Error();
-    const buf = ctx.createBufferSource();
-    buf.buffer = await ctx.decodeAudioData(file);
-    const buf2 = ctx.createBufferSource();
-    buf2.buffer = await ctx.decodeAudioData(file2);
-    buf.connect(ctx.destination);
-    buf2.connect(ctx.destination);
-    const frameCount = ctx.sampleRate * 2.0;
-    const newBuf = ctx.createBuffer(1, frameCount, ctx.sampleRate);
-    const datat = newBuf.getChannelData(0);
-    const src = buf.buffer.getChannelData(0);
-    datat.forEach((_, index) => {
-      datat[index] = src[index];
-    });
-    const newSmapl = ctx.createBufferSource();
-    newSmapl.buffer = newBuf;
-    newSmapl.connect(ctx.destination);
-    newSmapl.start();
-    console.log(datat);
-    console.log(newBuf);
-    // buf.start(0);
-    // buf2.start(0);
+    const manager = new AudioManager(bpm, 44100);
+    const { processor } = manager;
+    console.log(processor.secondPerBeat * 4);
+    const projectId = projectRef.id;
+    const trackIds = tracks.map((track) => track.id);
+    await manager.prepare(projectId, trackIds);
+    manager.play();
+    setAudioManager(manager);
+    setIsPlaying(true);
   };
-  useEffect(() => {
-    if (isPlaying) {
-      play();
-    }
-  }, [isPlaying]);
+
+  const pause = async () => {
+    audioManager?.stop();
+    setIsPlaying(false);
+  };
 
   const keyBind = () => {
     document.onkeydown = (e) => {
@@ -146,9 +129,7 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
     };
   };
   useEffect(() => {
-    topContext.current = new AudioContext();
-    attach();
-    return detach;
+    return snapshotEvent();
   }, []);
 
   useEffect(() => {
@@ -179,7 +160,7 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
           <FontAwesomeIcon icon={faCog} />
         </button>
       </header>
-      <TopPannel />
+      <TopPannel pause={pause} play={play} />
       <Head>
         <title>{project.name}</title>
       </Head>

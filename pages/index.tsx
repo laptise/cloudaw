@@ -52,18 +52,13 @@ const ProjectOverView: React.FC<Props> = ({ project }) => {
     }
   };
   const attachListener = () => {
-    onSnapshot(collaboratorsRef.current, (snapshot) => {
+    return onSnapshot(collaboratorsRef.current, (snapshot) => {
       setCoolaborators(snapshot.docs);
     });
   };
-  const detachListener = () => {
-    console.log("detached");
-    onSnapshot(collaboratorsRef.current, () => {});
-  };
   useEffect(() => {
-    attachListener();
     getSize();
-    return detachListener;
+    return attachListener();
   }, []);
   return (
     <FlexCol className="singleProject">
