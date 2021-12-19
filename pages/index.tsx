@@ -36,7 +36,7 @@ const ProjectOverView: React.FC<Props> = ({ project }) => {
   const [collaborators, setCoolaborators] = useState<QueryDocumentSnapshot<CollaboratorEntity>[]>();
   const getSize = async () => {
     const res = await db.wavs.where("projectId").equals(project.id).toArray();
-    const bytes = res.reduce((size, x) => size + x.buffer.byteLength, 0);
+    const bytes = res.reduce((size, x) => size + x.linear.byteLength, 0);
     setSize(formatBytes(bytes));
   };
 
