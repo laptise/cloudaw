@@ -8,7 +8,7 @@ import { TrackContext } from ".";
 import { DawContext } from "../..";
 import { db } from "../../../../db";
 import { FireBase } from "../../../../firebase";
-import { getNodeColRef, getProjectWavsRef, NodeEntity, RegionEntity } from "../../../../firebase/model";
+import { getNodeColRef, getProjectWavsRef, NodeEntity, RegionEntity } from "../../../../firebase/firestore";
 import { contextFocus, GlobFunctions } from "../../../../utils";
 import { AudioNodeGenerator, NodeContext } from "../../../../audioCore/audioNodes";
 import { AudioManager } from "../../../../audioCore/audioStore";

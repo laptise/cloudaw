@@ -19,7 +19,7 @@ import {
   ProjectConverter,
   TrackEntity,
   getRegionColRef,
-} from "../../firebase/model";
+} from "../../firebase/firestore";
 import { toObject } from "../../utils";
 
 const keyPair: any = {};

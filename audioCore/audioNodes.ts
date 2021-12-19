@@ -1,4 +1,4 @@
-import { NodeEntity } from "../firebase/model";
+import { NodeEntity } from "../firebase/firestore";
 
 function constructNodeController(v: AudioNode) {
   if (v instanceof GainNode) return new GainNodeContext(v);

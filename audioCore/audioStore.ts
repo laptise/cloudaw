@@ -1,6 +1,6 @@
 import { QueryDocumentSnapshot, startAfter } from "@firebase/firestore";
 import { db } from "../db";
-import { RegionEntity, TrackEntity } from "../firebase/model";
+import { RegionEntity, TrackEntity } from "../firebase/firestore";
 
 export default class VUMeterNode extends AudioWorkletNode {
   private _updateIntervalInMS: number;
@@ -185,9 +185,9 @@ class SingleTrack {
         const end = start + duration;
         const srcChannel = wav.linear.slice(start, end);
         srcChannel.forEach((_, index) => (channel[index + start] = srcChannel[index]));
-        this.trackBuffer.buffer = channelAudioBuffer;
       })
     );
+    this.trackBuffer.buffer = channelAudioBuffer;
     //
     const processorPath = "/audioWorklet/vuMeterProcessor.js";
     await this.ctx.audioWorklet.addModule(processorPath);

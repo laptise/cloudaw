@@ -10,7 +10,7 @@ import { faCog, faHome } from "@fortawesome/free-solid-svg-icons";
 import SettingModal from "./modal/setting";
 import Link from "next/link";
 import LeftPannel from "./leftPannel";
-import { CollaboratorEntity, getCollabColRef, getProjectDocRef, getProjectsColRef, getTracksColRef, TrackEntity } from "../../firebase/model";
+import { CollaboratorEntity, getCollabColRef, getProjectDocRef, getProjectsColRef, getTracksColRef, TrackEntity } from "../../firebase/firestore";
 import ContextMenu from "./contextMenu";
 import { TimeContext } from "../../utils";
 import { db } from "../../db";

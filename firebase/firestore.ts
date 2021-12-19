@@ -1,7 +1,7 @@
 import { collection, CollectionReference, doc, DocumentReference, FirestoreDataConverter } from "firebase/firestore";
-import { FireBase } from "..";
-import { toObject } from "../../utils";
-import { AudioNodeGenerator } from "../../audioCore/audioNodes";
+import { FireBase } from ".";
+import { toObject } from "../utils";
+import { AudioNodeGenerator } from "../audioCore/audioNodes";
 import { ref } from "firebase/storage";
 export function clone(src: any, target: any) {
   for (const [key] of Object.entries(src)) {

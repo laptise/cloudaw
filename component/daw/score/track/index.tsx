@@ -9,12 +9,15 @@ import {
   ProjectEntity,
   RegionEntity,
   TrackEntity,
-} from "../../../../firebase/model";
+} from "../../../../firebase/firestore";
 import { contextFocus, removeDocumentMouseUpMoveEvent } from "../../../../utils";
 import { AudioNodeGenerator } from "../../../../audioCore/audioNodes";
 import { ContextMenuContext, DawContext } from "../../index";
 import TrackCtl from "./ctl";
 import Region from "./region";
+import { FireBase } from "../../../../firebase";
+import { getProjectWavStorageRef } from "../../../../firebase/storage";
+import { ref, uploadBytes } from "firebase/storage";
 
 export const TrackContext = createContext<TrackContext>(null as any);
 
@@ -99,32 +102,62 @@ const Track: React.FC<ChannelProps> = (props) => {
     setFocusing(track.id);
     await contextFocus(`track-${track.id}`, projectRef, user);
   };
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+  const uploadFile = async (file: File) => {
+    const fileRef = ref(getProjectWavStorageRef(projectRef.id), file.name);
+    const buffer = await file.arrayBuffer();
+    const [node] = await Promise.all([new AudioContext().decodeAudioData(buffer), uploadBytes(fileRef, file)]);
+    const entity = new RegionEntity();
+    entity.duration = node.duration * 1000;
+    entity.src = file.name;
+    entity.startAt = 0;
+    entity.metastamp = new Date();
+    entity.timestamp = new Date();
+    await addDoc(getRegionColRef(track.ref), entity);
+  };
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    console.log(e);
+    e.stopPropagation();
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if (files) {
+      for (let i = 0; i <= files.length; i++) {
+        const file = files[i];
+        file && uploadFile(file);
+      }
+    }
+  };
   return (
     <TrackContext.Provider value={{ trackRef: track, trackState, volumeState, audioNodeGeneratorsState }}>
-      <input
-        onClick={(e) => passFocus()}
-        type="radio"
-        className="focusChecker"
-        data-doc-type="track"
-        id={`track-${track.id}`}
-        name={`focusFor1`}
-        ref={focuser}
-      />
-      <label htmlFor={`track-${track.id}`} className="channel focusTarget" style={{ height }} onContextMenu={callContext}>
-        <TrackCtl {...props} />
-        <div className="board">
-          {regions?.map?.((region, index) => (
-            <Region snapshot={region} key={index} />
-          ))}
-          {new Array(pjt.bar).fill(null).map((bar, index) => (
-            <div className="barArea" key={index}>
-              <span className="barIndex"> </span>
-            </div>
-          ))}
-          <div className="playBar" style={{ left: currentRatePosition * 100 + "%" }}></div>
-        </div>
-        <div className="resizeBar bottom" onMouseDown={mouseDown}></div>
-      </label>
+      <form>
+        <input
+          onClick={(e) => passFocus()}
+          type="radio"
+          className="focusChecker"
+          data-doc-type="track"
+          id={`track-${track.id}`}
+          name={`focusFor1`}
+          ref={focuser}
+        />
+        <label htmlFor={`track-${track.id}`} className="channel focusTarget" style={{ height }} onContextMenu={callContext}>
+          <TrackCtl {...props} />
+          <div onDragOver={onDragOver} onDrop={onDrop} className="board">
+            {regions?.map?.((region, index) => (
+              <Region snapshot={region} key={index} />
+            ))}
+            {new Array(pjt.bar).fill(null).map((bar, index) => (
+              <div className="barArea" key={index}>
+                <span className="barIndex"> </span>
+              </div>
+            ))}
+            <div className="playBar" style={{ left: currentRatePosition * 100 + "%" }}></div>
+          </div>
+          <div className="resizeBar bottom" onMouseDown={mouseDown}></div>
+        </label>
+      </form>
     </TrackContext.Provider>
   );
 };

@@ -1,7 +1,7 @@
 import { addDoc, deleteDoc, DocumentReference, getDocs, onSnapshot, QueryDocumentSnapshot, updateDoc } from "@firebase/firestore";
 import React, { useContext, useEffect, useState } from "react";
 import { ContextMenuContext, DawContext } from "../.";
-import { getNodeColRef, NodeEntity, TrackEntity } from "../../../firebase/model";
+import { getNodeColRef, NodeEntity, TrackEntity } from "../../../firebase/firestore";
 import { ContextMenuInit, defineContextMenu } from "../../../utils";
 import { AudioNodeGenerator } from "../../../audioCore/audioNodes";
 import NodeInfo from "./nodeInfo";

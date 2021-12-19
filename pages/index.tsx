@@ -10,7 +10,7 @@ import Link from "next/link";
 import { firebaseAdmin } from "../back/firebaseAdmin";
 import { getUserFromSession } from "../back/auth";
 import { toObject } from "../utils";
-import { clone, CollaboratorEntity, getCollabColRef, getProjectsColRef, ProjectEntity } from "../firebase/model";
+import { clone, CollaboratorEntity, getCollabColRef, getProjectsColRef, ProjectEntity } from "../firebase/firestore";
 import { db } from "../db";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faTrashAlt } from "@fortawesome/free-solid-svg-icons";

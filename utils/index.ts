@@ -2,7 +2,7 @@ import { DocumentReference } from "@firebase/firestore";
 import { UserRecord } from "firebase-admin/lib/auth/user-record";
 import { doc, updateDoc } from "firebase/firestore";
 import React from "react";
-import { getCollabColRef, ProjectEntity } from "../firebase/model";
+import { getCollabColRef, ProjectEntity } from "../firebase/firestore";
 
 /**プレインオブジェクトにする
  * @param src 対象

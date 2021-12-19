@@ -1,7 +1,7 @@
 import { deleteDoc, QueryDocumentSnapshot } from "firebase/firestore";
 import React, { useContext, useState } from "react";
 import { ContextMenuContext } from "..";
-import { NodeEntity } from "../../../firebase/model";
+import { NodeEntity } from "../../../firebase/firestore";
 import DelayModal from "./nodeCtlModals/delayModal";
 import GainModal from "./nodeCtlModals/gainModal";
 

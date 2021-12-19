@@ -1,6 +1,6 @@
 import { QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
 import React, { useState } from "react";
-import { NodeEntity } from "../../../../firebase/model";
+import { NodeEntity } from "../../../../firebase/firestore";
 import { FlexCol } from "../../../flexBox";
 import Modal from "../../../modal";
 
