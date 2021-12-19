@@ -14,7 +14,7 @@ import { CollaboratorEntity, getCollabColRef, getProjectDocRef, getProjectsColRe
 import ContextMenu from "./contextMenu";
 import { TimeContext } from "../../utils";
 import { db } from "../../db";
-import { AudioManager } from "../../utils/audioStore";
+import { AudioManager } from "../../audioCore/audioStore";
 
 export const DawContext = createContext<DawContext>(null as any);
 export const ModalViewContext = createContext<ModalViewContext>(null as any);
@@ -49,8 +49,7 @@ export function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnap
 
 const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const { settingModalViewState } = useContext(ModalViewContext);
-  const { projectState, onPlayFireState, tracksState, playingState, timeState, timeContextState, curerntRatePositionState, dispatcher } =
-    useContext(DawContext);
+  const { projectState, onPlayFireState, tracksState, playingState, timeState, timeContextState, curerntRatePositionState } = useContext(DawContext);
   const [tracks] = tracksState;
   const [onPlayFire] = onPlayFireState;
   const { contextsState } = useContext(PlayContext);
@@ -72,7 +71,6 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
     const unsubscriber = [
       onSnapshot(projectRef, (doc) => {
         const data = doc.data();
-        console.log(11888);
         if (data) {
           setPjt(data);
           setBpm(data.bpm);
@@ -107,7 +105,6 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const play = async () => {
     const manager = new AudioManager(bpm, 44100);
     const { processor } = manager;
-    console.log(processor.secondPerBeat * 4);
     const projectId = projectRef.id;
     const trackIds = tracks.map((track) => track.id);
     await manager.prepare(projectId, trackIds);
@@ -190,14 +187,13 @@ const DawProvider: React.FC<ProjectProp> = (props) => {
   const curerntRatePositionState = useState(0);
   const contextsState = useState<AudioContextSet[]>([]);
   const onPlayFireState = useState<() => Promise<string>>(null as any);
-  const dispatcher = () => "hello";
-  const onPlayFire = async () => {};
+  const dispatcherState = useState<() => any>(null as any);
   return (
     <DawContext.Provider
       value={{
         trackInfo: {},
         onPlayFireState,
-        dispatcher,
+        dispatcherState,
         curerntRatePositionState,
         timeContextState,
         timeState,

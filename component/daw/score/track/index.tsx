@@ -1,9 +1,17 @@
 import { UserRecord } from "firebase-admin/lib/auth/user-record";
 import { addDoc, deleteDoc, doc, DocumentReference, onSnapshot, QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import { getCollabColRef, getRegionColRef, getTracksColRef, ProjectEntity, RegionEntity, TrackEntity } from "../../../../firebase/model";
+import {
+  getCollabColRef,
+  getNodeColRef,
+  getRegionColRef,
+  getTracksColRef,
+  ProjectEntity,
+  RegionEntity,
+  TrackEntity,
+} from "../../../../firebase/model";
 import { contextFocus, removeDocumentMouseUpMoveEvent } from "../../../../utils";
-import { AudioNodeGenerator } from "../../../../utils/audioNodes";
+import { AudioNodeGenerator } from "../../../../audioCore/audioNodes";
 import { ContextMenuContext, DawContext } from "../../index";
 import TrackCtl from "./ctl";
 import Region from "./region";
@@ -13,7 +21,6 @@ export const TrackContext = createContext<TrackContext>(null as any);
 /**トラック */
 const Track: React.FC<ChannelProps> = (props) => {
   const { projectRef, user, projectState, curerntRatePositionState, focusingTrackState, trackInfo, playingState } = useContext(DawContext);
-  const [playing] = playingState;
   const [focusing, setFocusing] = focusingTrackState;
   const [currentRatePosition] = curerntRatePositionState;
   const [pjt] = projectState;
@@ -31,17 +38,13 @@ const Track: React.FC<ChannelProps> = (props) => {
   const { name, volume } = data;
   const trackState = useState(data);
   const volumeState = useState(volume);
-  const focus = async () => {
-    if (focuser.current) {
-      focuser.current.checked = true;
-      const colRef = getCollabColRef(projectRef);
-      const docRef2 = doc(colRef, user.uid);
-      updateDoc(docRef2, {
-        focusing: `${focuser.current.id}`,
-        displayName: user.displayName || "unknown",
-      });
-    }
-  };
+  useEffect(
+    () =>
+      onSnapshot(getNodeColRef(track.ref), (snapshot) => {
+        console.log(snapshot);
+      }),
+    []
+  );
   const mouseDown = (e: React.MouseEvent) => {
     const startY = e.clientY;
     document.onmousemove = (e) => {

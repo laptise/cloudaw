@@ -1,11 +1,18 @@
 // db.ts
 import Dexie, { Table } from "dexie";
 
+export interface FxNode {
+  id: string;
+  name: string;
+  projectId: string;
+  trackId: string;
+}
+
 export interface Wav {
   name: string;
   id: string;
   projectId: string;
-  buffer: ArrayBuffer;
+  linear: Float32Array;
   duration: number;
   startAt: number;
   timestamp: Date;
@@ -17,11 +24,13 @@ export class MySubClassedDexie extends Dexie {
   // 'friends' is added by dexie when declaring the stores()
   // We just tell the typing system this is the case
   wavs!: Table<Wav>;
+  fxNodes!: Table<FxNode>;
 
   constructor() {
-    super("wavs");
+    super("cloudaw");
     this.version(1).stores({
-      wavs: "id, projectId, [projectId+trackId]", // Primary key and indexed props
+      wavs: "id, projectId, [projectId+trackId]",
+      fxNodes: "id, projectId, [projectId+trackId]",
     });
   }
 }

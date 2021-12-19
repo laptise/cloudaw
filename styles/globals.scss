@@ -5,6 +5,12 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
   background-color: #ccc;
 }
+
+$dark: #101c40;
+$softDark: #1b2440;
+$medium: #4f5873;
+$softLight: #9498a6;
+$extra: #416ca6;
 input.textLike {
   &:read-only {
     all: unset;

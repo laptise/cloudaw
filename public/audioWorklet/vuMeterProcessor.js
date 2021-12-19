@@ -30,13 +30,11 @@ registerProcessor(
         const samples = input[0]; // 入力される音声のチャンネル数も１つだけ（モノラル）と想定する
         let sum = 0;
         let rms = 0;
-
         // 再生中のサンプルの平均を計算する
         // 一度に取得するサンプル数は128個
         for (let i = 0; i < samples.length; ++i) sum += samples[i] * samples[i];
         rms = Math.sqrt(sum / samples.length);
         this._volume = Math.max(rms, this._volume * SMOOTHING_FACTOR); // 急激な音量変化を抑制する
-
         // 音量の更新を VUMeterNode クラスに伝える
         this._nextUpdateFrame -= samples.length;
         if (this._nextUpdateFrame < 0) {
@@ -44,7 +42,6 @@ registerProcessor(
           this.port.postMessage({ volume: this._volume }); // メッセージの送信
         }
       }
-
       //VUMeterNode クラスのオブジェクトのライフタイム制御
       return this._volume >= MINIMUM_VALUE;
     }

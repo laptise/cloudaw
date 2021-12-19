@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { ContextMenuContext, DawContext } from "../.";
 import { getNodeColRef, NodeEntity, TrackEntity } from "../../../firebase/model";
 import { ContextMenuInit, defineContextMenu } from "../../../utils";
-import { AudioNodeGenerator } from "../../../utils/audioNodes";
+import { AudioNodeGenerator } from "../../../audioCore/audioNodes";
 import NodeInfo from "./nodeInfo";
 
 const TrackInfo: React.FC<{ track: QueryDocumentSnapshot<TrackEntity> }> = ({ track }) => {

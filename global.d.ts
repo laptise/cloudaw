@@ -2,8 +2,8 @@ import { DocumentReference, QueryDocumentSnapshot } from "@firebase/firestore";
 import { Dispatch, SetStateAction } from "react";
 import { ProjectEntity, TrackEntity } from "./firebase/model";
 import { TimeContext } from "./utils";
-import { AudioNodeGenerator } from "./utils/audioNodes";
-import { AudioManager } from "./utils/audioStore";
+import { AudioNodeGenerator } from "./audioCore/audioNodes";
+import { AudioManager } from "./audioCore/audioStore";
 declare global {
   interface HTMLMediaElement {
     captureStream(): MediaStream;
@@ -46,7 +46,7 @@ declare global {
     timeContextState: State<TimeContext>;
     curerntRatePositionState: State<number>;
     focusingTrackState: State<string>;
-    dispatcher: () => string;
+    dispatcherState: State<() => any>;
     onPlayFireState: State<() => Promise<string>>;
     trackInfo: TrackInfo;
   }

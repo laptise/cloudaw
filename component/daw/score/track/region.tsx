@@ -10,8 +10,8 @@ import { db } from "../../../../db";
 import { FireBase } from "../../../../firebase";
 import { getNodeColRef, getProjectWavsRef, NodeEntity, RegionEntity } from "../../../../firebase/model";
 import { contextFocus, GlobFunctions } from "../../../../utils";
-import { AudioNodeGenerator, NodeContext } from "../../../../utils/audioNodes";
-import { AudioManager } from "../../../../utils/audioStore";
+import { AudioNodeGenerator, NodeContext } from "../../../../audioCore/audioNodes";
+import { AudioManager } from "../../../../audioCore/audioStore";
 import { FlexCol, FlexRow } from "../../../flexBox";
 
 interface Props {
@@ -42,7 +42,7 @@ const Region: React.FC<Props> = ({ snapshot }) => {
   const [width, setWidth] = useState(0);
   //リジョンのオーディオ
   const [audio, setAudio] = useState<HTMLAudioElement>(null as any);
-  const [buffer, setBuffer] = useState<AudioBuffer>();
+  const [buffer, setBuffer] = useState<Float32Array>();
   const [srcNode, setSrcNode] = useState<AudioBufferSourceNode>();
   const [volumeNode, setVolumeNode] = useState<GainNode>();
   const [updateState, setUpdateState] = useState(RegionLocalUpdateState.unknown);
@@ -84,7 +84,8 @@ const Region: React.FC<Props> = ({ snapshot }) => {
         setUpdateState(RegionLocalUpdateState.updateNeeded);
         const buffer = await (await getBlob(ref(getProjectWavsRef(projectRef), src))).arrayBuffer();
         const entity = await getData();
-        const newItem = { ...entity, ...{ buffer } };
+        const linear = (await new AudioContext().decodeAudioData(buffer)).getChannelData(0);
+        const newItem = { ...entity, ...{ buffer: null as any, linear } };
         db.wavs.put(newItem);
         setUpdateState(RegionLocalUpdateState.onTime);
         return newItem;
@@ -98,14 +99,11 @@ const Region: React.FC<Props> = ({ snapshot }) => {
         return item;
       }
     })();
-    const arrayBuffer = wav.buffer;
-    const buffer = await new AudioContext().decodeAudioData(arrayBuffer);
     const processor = new AudioManager(project.bpm, 44100).processor;
     const start = processor.samplePerMilliSecond * wav.startAt;
     const duration = processor.samplePerMilliSecond * wav.duration;
     const end = start + duration;
-    const ab = buffer.getChannelData(0);
-    const sliced = ab.slice(start, end);
+    const sliced = wav.linear.slice(start, end);
     const peaks = getPeaks(sliced);
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -128,7 +126,7 @@ const Region: React.FC<Props> = ({ snapshot }) => {
         barHeight = sample * halfCanvasH;
         ctx.fillRect(i * (barWidth + barMargin), halfCanvasH, barWidth, barHeight);
       }
-      setBuffer(buffer);
+      setBuffer(wav.linear);
     }
   };
   function getPeaks(array: Float32Array, peakLength = 2000) {

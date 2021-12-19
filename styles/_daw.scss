@@ -327,6 +327,9 @@
               opacity: 0.3;
               cursor: not-allowed;
             }
+            * {
+              text-shadow: 1px 1px 3px black, 1px 1px 3px black;
+            }
             position: absolute;
             // border: 1px solid #ccc;
             box-shadow: 0 0 2px rgba(0, 0, 0, 1);
@@ -342,6 +345,7 @@
               position: absolute;
               top: 0;
               left: 0;
+              z-index: -1;
             }
             &:hover {
               filter: brightness(1.2);
