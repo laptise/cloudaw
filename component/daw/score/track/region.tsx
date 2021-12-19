@@ -100,7 +100,7 @@ const Region: React.FC<Props> = ({ snapshot }) => {
       }
     })();
     const processor = new AudioManager(projectRef.id, project.bpm, 44100).processor;
-    const start = processor.samplePerMilliSecond * wav.startAt;
+    const start = 0;
     const duration = processor.samplePerMilliSecond * wav.duration;
     const end = start + duration;
     const sliced = wav.linear.slice(start, end);
