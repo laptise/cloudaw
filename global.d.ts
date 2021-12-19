@@ -49,6 +49,7 @@ declare global {
     dispatcherState: State<() => any>;
     onPlayFireState: State<() => Promise<string>>;
     trackInfo: TrackInfo;
+    audioManagerState: State<AudioManager>;
   }
 
   /**モーダルの表示状態 */

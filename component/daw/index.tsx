@@ -49,7 +49,8 @@ export function setFocusTarget(target: HTMLInputElement, user: QueryDocumentSnap
 
 const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const { settingModalViewState } = useContext(ModalViewContext);
-  const { projectState, onPlayFireState, tracksState, playingState, timeState, timeContextState, curerntRatePositionState } = useContext(DawContext);
+  const { projectState, onPlayFireState, tracksState, playingState, timeState, timeContextState, curerntRatePositionState, audioManagerState } =
+    useContext(DawContext);
   const [tracks] = tracksState;
   const [onPlayFire] = onPlayFireState;
   const { contextsState } = useContext(PlayContext);
@@ -65,7 +66,7 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   const collabColRef = getCollabColRef(projectRef);
   const [pjt, setPjt] = projectState;
   const [settingModalView, setSettingModalView] = settingModalViewState;
-  const [audioManager, setAudioManager] = useState<AudioManager>();
+  const [audioManager, setAudioManager] = audioManagerState;
   /**スナップショットリスナー追加 */
   const snapshotEvent = () => {
     const unsubscriber = [
@@ -103,13 +104,13 @@ const Daw: React.FC<ProjectProp> = ({ project, user }) => {
   };
   useEffect(() => {}, [pjt]);
   const play = async () => {
-    const manager = new AudioManager(bpm, 44100);
+    const manager = new AudioManager(projectRef.id, bpm, 44100);
     const { processor } = manager;
     const projectId = projectRef.id;
     const trackIds = tracks.map((track) => track.id);
     await manager.prepare(projectId, trackIds);
-    manager.play();
     setAudioManager(manager);
+    manager.play();
     setIsPlaying(true);
   };
 
@@ -188,9 +189,11 @@ const DawProvider: React.FC<ProjectProp> = (props) => {
   const contextsState = useState<AudioContextSet[]>([]);
   const onPlayFireState = useState<() => Promise<string>>(null as any);
   const dispatcherState = useState<() => any>(null as any);
+  const audioManagerState = useState(null as any);
   return (
     <DawContext.Provider
       value={{
+        audioManagerState,
         trackInfo: {},
         onPlayFireState,
         dispatcherState,

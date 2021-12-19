@@ -99,7 +99,7 @@ const Region: React.FC<Props> = ({ snapshot }) => {
         return item;
       }
     })();
-    const processor = new AudioManager(project.bpm, 44100).processor;
+    const processor = new AudioManager(projectRef.id, project.bpm, 44100).processor;
     const start = processor.samplePerMilliSecond * wav.startAt;
     const duration = processor.samplePerMilliSecond * wav.duration;
     const end = start + duration;

@@ -45,6 +45,7 @@
     filter: brightness(1.3);
   }
   .focusLabel {
+    z-index: 2;
     position: absolute;
     top: 0;
     left: 0;
@@ -312,6 +313,36 @@
           border-right: 1px solid gray;
           background-color: white;
           position: relative;
+          .meter {
+            height: 7.5px;
+            position: relative;
+            .masker {
+              position: absolute;
+              top: 0;
+              right: 0;
+              height: 100%;
+              width: 100%;
+              transition: width 50ms;
+              background-color: white;
+              z-index: 1;
+            }
+            .bar {
+              position: absolute;
+              top: 0;
+              clip-path: rect(10px, 20px, 30px, 40px);
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgb(62, 255, 0);
+              background: linear-gradient(
+                90deg,
+                rgba(62, 255, 0, 1) 44%,
+                rgba(239, 255, 0, 1) 69%,
+                rgba(255, 139, 0, 1) 91%,
+                rgba(255, 0, 0, 1) 100%
+              );
+            }
+          }
         }
         .board {
           overflow: auto;
