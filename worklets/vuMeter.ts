@@ -1,10 +1,11 @@
-export default class VUMeterNode extends AudioWorkletNode {
-  _updateIntervalInMS: any;
-  _volume: any;
-  constructor(context: BaseAudioContext, updateIntervalInMS: any) {
+export class VUMeterNode extends AudioWorkletNode {
+  private _updateIntervalInMS: number;
+  private _volume: number;
+  constructor(context: BaseAudioContext, updateIntervalInMS: number) {
     super(context, "vumeter", {
       numberOfInputs: 1, // 受け付ける入力の数
-      numberOfOutputs: 0, // 出力の数
+      numberOfOutputs: 1, // 出力の数
+      outputChannelCount: [1],
       channelCount: 1, // 出力のチャンネル数。今回、出力はないので0以外なら何でもよい。
       processorOptions: {
         updateIntervalInMS: updateIntervalInMS || 16.67, // vuMeterProcessor に引き渡すユーザー任意のカスタムオプション

@@ -1,49 +1,36 @@
 import { QueryDocumentSnapshot, startAfter } from "@firebase/firestore";
 import { db } from "../db";
 import { RegionEntity, TrackEntity } from "../firebase/firestore";
+import { MetronomeNode } from "../worklets/metronome";
+import { VUMeterNode } from "../worklets/vuMeter";
 
-export default class VUMeterNode extends AudioWorkletNode {
-  private _updateIntervalInMS: number;
-  private _volume: number;
-  constructor(context: BaseAudioContext, updateIntervalInMS: number) {
-    super(context, "vumeter", {
-      numberOfInputs: 1, // 受け付ける入力の数
-      numberOfOutputs: 0, // 出力の数
-      channelCount: 1, // 出力のチャンネル数。今回、出力はないので0以外なら何でもよい。
-      processorOptions: {
-        updateIntervalInMS: updateIntervalInMS || 16.67, // vuMeterProcessor に引き渡すユーザー任意のカスタムオプション
-      },
-    });
-
-    // VUMeterNodeの内部状態
-    this._updateIntervalInMS = updateIntervalInMS;
-    this._volume = 0;
-
-    // vuMeterProcessor からメッセージを受け取った時のイベントコールバック
-    this.port.onmessage = (event) => {
-      if (event.data.volume) this._volume = event.data.volume;
-    };
-    this.port.start();
+class WorkletCaller {
+  parent: AudioManager;
+  private path = "/audioWorklet/";
+  private getPath(fileName: string) {
+    return `${this.path}${fileName}.js`;
   }
-
-  get updateInterval() {
-    return this._updateIntervalInMS;
+  get ctx() {
+    return this.parent.ctx;
   }
-
-  set updateInterval(updateIntervalInMS) {
-    this._updateIntervalInMS = updateIntervalInMS;
-    this.port.postMessage({ updateIntervalInMS: updateIntervalInMS }); // メッセージの送信
+  constructor(parent: AudioManager) {
+    this.parent = parent;
   }
-
-  volume() {
-    // 現在の音量を dBu 単位に変換して返す関数。ゲッターでも良かった。
-    return 20 * Math.log10(this._volume) + 18;
+  public async call(fileName: string) {
+    if (process.browser) await this.ctx.audioWorklet.addModule(this.getPath(fileName));
+  }
+  public async vuMeter() {
+    await this.call("vuMeterProcessor");
+  }
+  public async metronome() {
+    await this.call("metronomeProcessor");
   }
 }
 
 export class AudioManager {
-  public tracks: TrackInfo = new TrackInfo(this);
-  public processor: Processor = new Processor(this);
+  public tracks = new TrackInfo(this);
+  public processor = new Processor(this);
+  public workletCaller = new WorkletCaller(this);
   private sourceNodes!: AudioBufferSourceNode[];
   private metronomeNode!: OscillatorNode;
   public projectId: string;
@@ -156,6 +143,9 @@ class SingleTrack {
   manager: AudioManager;
   trackBuffer!: AudioBufferSourceNode;
   vuMeterNode!: VUMeterNode;
+  get workletCaller() {
+    return this.manager.workletCaller;
+  }
   id: string;
   get ctx() {
     return this.manager.ctx;
@@ -172,7 +162,7 @@ class SingleTrack {
     const projectId = this.manager.projectId;
     const trackId = this.id;
     this.trackBuffer = this.ctx.createBufferSource();
-    const channelAudioBuffer = this.ctx.createBuffer(1, this.processor.samplePerMilliSecond * 600000, this.ctx.sampleRate);
+    const channelAudioBuffer = this.ctx.createBuffer(1, 100000000, this.ctx.sampleRate);
     const channel = channelAudioBuffer.getChannelData(0);
     const res = await db.wavs
       .where({ projectId, trackId })
@@ -182,23 +172,20 @@ class SingleTrack {
       res.map(async (wav) => {
         const duration = wav.duration * this.processor.samplePerMilliSecond;
         const start = wav.startAt === 0 ? wav.startAt : Math.round(this.processor.samplePerMilliSecond * wav.startAt);
-        const end = start + duration;
-        const srcChannel = wav.linear.slice(start, end);
-        srcChannel.forEach((_, index) => (channel[index + start] = srcChannel[index]));
+        const srcChannel = wav.linear;
+        channelAudioBuffer.copyToChannel(srcChannel, 0, start);
       })
     );
     this.trackBuffer.buffer = channelAudioBuffer;
-    //
-    const processorPath = "/audioWorklet/vuMeterProcessor.js";
-    await this.ctx.audioWorklet.addModule(processorPath);
+    await Promise.all([this.workletCaller.metronome(), this.workletCaller.vuMeter()]);
   }
   public onMeter(e: MessageEvent<any>) {}
   public play() {
     this.vuMeterNode = new VUMeterNode(this.ctx, 50);
+    this.trackBuffer.connect(this.vuMeterNode).connect(this.ctx.destination);
+    new MetronomeNode(this.ctx, this.manager.bpm).connect(this.ctx.destination);
+    this.trackBuffer.start();
     this.vuMeterNode.port.onmessage = (e) => this.onMeter(e);
-    this.trackBuffer.connect(this.vuMeterNode);
-    this.trackBuffer.connect(this.ctx.destination);
-    this.trackBuffer?.start();
   }
   public stop() {
     this.trackBuffer.disconnect();

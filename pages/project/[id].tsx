@@ -1,26 +1,13 @@
-import { collection, getDoc, getDocs, onSnapshot } from "@firebase/firestore";
-import { doc, DocumentReference, QueryDocumentSnapshot } from "firebase/firestore";
 import { GetServerSideProps, NextPage } from "next";
 import React, { createContext, useEffect, useState } from "react";
 import { getUserFromSession } from "../../back/auth";
 import { firebaseAdmin } from "../../back/firebaseAdmin";
-import Daw from "../../component/daw";
-import ContextMenu from "../../component/daw/contextMenu";
-import AddNewTrackModal from "../../component/daw/modal/addNewTrack";
-import SettingModal from "../../component/daw/modal/setting";
-import {
-  CollaboratorEntity,
-  dynamicConverter,
-  getCollabColRef,
-  getProjectDocRef,
-  getProjectsColRef,
-  getTracksColRef,
-  ProjectEntity as projectEntity,
-  ProjectConverter,
-  TrackEntity,
-  getRegionColRef,
-} from "../../firebase/firestore";
+import { dynamicConverter, ProjectEntity as projectEntity, ProjectConverter, TrackEntity } from "../../firebase/firestore";
 import { toObject } from "../../utils";
+import dynamic from "next/dynamic";
+const Daw = dynamic(() => import("../../component/daw"), {
+  ssr: false,
+});
 
 const keyPair: any = {};
 

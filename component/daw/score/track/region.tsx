@@ -11,8 +11,9 @@ import { FireBase } from "../../../../firebase";
 import { getNodeColRef, getProjectWavsRef, NodeEntity, RegionEntity } from "../../../../firebase/firestore";
 import { contextFocus, GlobFunctions } from "../../../../utils";
 import { AudioNodeGenerator, NodeContext } from "../../../../audioCore/audioNodes";
-import { AudioManager } from "../../../../audioCore/audioStore";
 import { FlexCol, FlexRow } from "../../../flexBox";
+import { AudioManager } from "../../../../audioCore/audioStore";
+import dynamic from "next/dynamic";
 
 interface Props {
   snapshot: QueryDocumentSnapshot<RegionEntity>;
@@ -43,7 +44,6 @@ const Region: React.FC<Props> = ({ snapshot }) => {
   //リジョンのオーディオ
   const [audio, setAudio] = useState<HTMLAudioElement>(null as any);
   const [buffer, setBuffer] = useState<Float32Array>();
-  const [srcNode, setSrcNode] = useState<AudioBufferSourceNode>();
   const [volumeNode, setVolumeNode] = useState<GainNode>();
   const [updateState, setUpdateState] = useState(RegionLocalUpdateState.unknown);
   //リジョンの再生状態

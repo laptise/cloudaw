@@ -1,23 +1,16 @@
-import { UserRecord } from "firebase-admin/lib/auth/user-record";
 import { addDoc, deleteDoc, doc, DocumentReference, onSnapshot, QueryDocumentSnapshot, updateDoc } from "firebase/firestore";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import {
-  getCollabColRef,
-  getNodeColRef,
-  getRegionColRef,
-  getTracksColRef,
-  ProjectEntity,
-  RegionEntity,
-  TrackEntity,
-} from "../../../../firebase/firestore";
+import { getNodeColRef, getRegionColRef, getTracksColRef, RegionEntity, TrackEntity } from "../../../../firebase/firestore";
 import { contextFocus, removeDocumentMouseUpMoveEvent } from "../../../../utils";
 import { AudioNodeGenerator } from "../../../../audioCore/audioNodes";
 import { ContextMenuContext, DawContext } from "../../index";
 import TrackCtl from "./ctl";
-import Region from "./region";
-import { FireBase } from "../../../../firebase";
 import { getProjectWavStorageRef } from "../../../../firebase/storage";
 import { ref, uploadBytes } from "firebase/storage";
+import dynamic from "next/dynamic";
+const Region = dynamic(() => import("./region"), {
+  ssr: false,
+});
 
 export const TrackContext = createContext<TrackContext>(null as any);
 
