@@ -31,14 +31,13 @@ export class AudioManager {
   public tracks = new TrackInfo(this);
   public processor = new Processor(this);
   public workletCaller = new WorkletCaller(this);
-  private sourceNodes!: AudioBufferSourceNode[];
-  private metronomeNode!: OscillatorNode;
   public projectId: string;
   get sampleRate() {
     return this.ctx.sampleRate;
   }
   public ctx: AudioContext;
   public bpm: number;
+  private metronomeNode!: MetronomeNode;
   constructor(projectId: string, bpm: number, sampleRate: number) {
     this.projectId = projectId;
     this.bpm = bpm;
@@ -48,6 +47,7 @@ export class AudioManager {
     this.tracks = new TrackInfo(this);
   }
   public async prepare(projectId: string, trackIds: string[]) {
+    await Promise.all([this.workletCaller.metronome(), this.workletCaller.vuMeter()]);
     this.tracks = new TrackInfo(this);
     await Promise.all(
       trackIds.map(async (trackId) => {
@@ -57,30 +57,14 @@ export class AudioManager {
       })
     );
     await Promise.all(this.tracks.allTracks.map((track) => track.prepare()));
-  }
-  private makeMetronome() {
-    const osc = this.ctx.createOscillator();
-    osc.frequency.value = 1000;
-    this.metronomeNode = osc;
-    const gain = this.ctx.createGain();
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-    gain.gain.value = 0;
-    return gain;
+    this.metronomeNode = new MetronomeNode(this.ctx, this.bpm);
   }
   public play() {
-    const metronomeVolume = this.makeMetronome();
-    this.metronomeNode.start();
-    setInterval(() => {
-      metronomeVolume.gain.value = 0.5;
-      setTimeout(() => {
-        metronomeVolume.gain.value = 0;
-      }, 1);
-    }, this.processor.milliSecondPerBeat);
+    this.metronomeNode.connect(this.ctx.destination);
     this.tracks.allTracks.forEach((x) => x.play());
   }
   public stop() {
-    this.metronomeNode.stop();
+    this.metronomeNode.disconnect();
     this.tracks.allTracks.forEach((track) => track.stop());
   }
 }
@@ -143,6 +127,7 @@ class SingleTrack {
   manager: AudioManager;
   trackBuffer!: AudioBufferSourceNode;
   vuMeterNode!: VUMeterNode;
+  volumeNode!: GainNode;
   get workletCaller() {
     return this.manager.workletCaller;
   }
@@ -177,15 +162,17 @@ class SingleTrack {
       })
     );
     this.trackBuffer.buffer = channelAudioBuffer;
-    await Promise.all([this.workletCaller.metronome(), this.workletCaller.vuMeter()]);
+    this.vuMeterNode = new VUMeterNode(this.ctx, 50);
+    this.volumeNode = this.ctx.createGain();
+    this.trackBuffer.connect(this.volumeNode).connect(this.vuMeterNode).connect(this.ctx.destination);
+    this.vuMeterNode.port.onmessage = (e) => this.onMeter(e);
+  }
+  set volume(v: number) {
+    if (v !== undefined) this.volumeNode.gain.value = v / 1000;
   }
   public onMeter(e: MessageEvent<any>) {}
   public play() {
-    this.vuMeterNode = new VUMeterNode(this.ctx, 50);
-    this.trackBuffer.connect(this.vuMeterNode).connect(this.ctx.destination);
-    new MetronomeNode(this.ctx, this.manager.bpm).connect(this.ctx.destination);
     this.trackBuffer.start();
-    this.vuMeterNode.port.onmessage = (e) => this.onMeter(e);
   }
   public stop() {
     this.trackBuffer.disconnect();

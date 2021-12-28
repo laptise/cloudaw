@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { TrackContext } from ".";
 import { DawContext } from "../..";
 import useTrackVuMeter from "../../../../hooks/audioMeter";
+import useVolumeMeter from "../../../../hooks/volumeControl";
 
 interface MeterProp {
   width: number;
@@ -30,7 +31,8 @@ const TrackCtl: React.FC<ChannelProps> = (props) => {
   const { volumeState } = useContext(TrackContext);
   const [currentVolume, setCurrentVolue] = volumeState;
   const [inpueDisabled, setInputDisabled] = useState(true);
-  const [vol, setVol] = useState(0);
+  const [volWidth, setVolWidth] = useState(0);
+  useVolumeMeter(audioManager, track.id, currentVolume);
   const vuMeter = useTrackVuMeter(audioManager, track.id);
   const mouseDown = (e: React.MouseEvent) => {
     const startX = e.clientX;
@@ -46,10 +48,10 @@ const TrackCtl: React.FC<ChannelProps> = (props) => {
       const volume = Math.abs(vuMeter);
       if (volume > 0 && volume < 60) {
         const offset = 60;
-        setVol((volume / offset) * 100);
+        setVolWidth((volume / offset) * 100);
         // setPer(100 - percentage);
-      } else setVol(100);
-    } else setVol(100);
+      } else setVolWidth(100);
+    } else setVolWidth(100);
   };
   return (
     <div className="ctl" style={{ width: startWidth }}>
@@ -62,7 +64,7 @@ const TrackCtl: React.FC<ChannelProps> = (props) => {
         value={name}
       />
       <input onChange={(e) => setCurrentVolue(Number(e.currentTarget.value))} type="range" min={0} max={1000} value={currentVolume} />
-      <Meter width={vol} />
+      <Meter width={volWidth} />
       <div className="resizeBar right" onMouseDown={mouseDown}></div>
     </div>
   );

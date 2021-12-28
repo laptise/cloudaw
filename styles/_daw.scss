@@ -46,6 +46,7 @@
   }
   .focusLabel {
     position: absolute;
+    pointer-events: none;
     top: 0;
     left: 0;
     width: 100%;
@@ -60,7 +61,7 @@
     }
     .badge {
       z-index: 2;
-
+      pointer-events: all;
       position: absolute;
       background-color: red;
       left: 0;

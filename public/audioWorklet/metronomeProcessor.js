@@ -7,8 +7,6 @@ registerProcessor(
   class extends AudioWorkletProcessor {
     constructor(option) {
       super();
-      const { bpm } = option.processorOptions;
-      this.samplePerBeat = (60 / bpm) * sampleRate;
     }
     prevCounted = 0;
     prevFreq = 1000;
@@ -17,7 +15,7 @@ registerProcessor(
       return [
         {
           name: "frequency",
-          defaultValue: 440,
+          defaultValue: 1000,
           minValue: 0,
           maxValue: 0.5 * sampleRate,
           automationRate: "a-rate",
@@ -25,17 +23,22 @@ registerProcessor(
         { name: "bpm", defaultValue: 100, minValue: 1, maxValue: 350 },
       ];
     }
-    count() {
-      const toCount = currentFrame > this.prevCounted + this.samplePerBeat;
-      if (toCount) {
+    getSampleRatePerBeat(bpm) {
+      return (60 / bpm) * sampleRate;
+    }
+    count(bpm) {
+      const toCount = currentFrame > this.prevCounted + this.getSampleRatePerBeat(bpm);
+      if (currentFrame > 100 || toCount) {
         this.prevCounted = currentFrame;
-        return true;
-      } else return false;
+        return 1;
+      } else return 0;
     }
     process(inputs, outputs, parameters) {
+      const [bpm] = parameters["bpm"];
       const [output] = outputs;
       const freqs = parameters.frequency;
       const [channel] = output;
+      const vol = 0; // 壊れてる
       for (let sample = 0; sample < channel.length; sample++) {
         const freq = freqs.length > 1 ? freqs[sample] : freqs[0];
         const globTime = currentTime + sample / sampleRate;
@@ -43,9 +46,10 @@ registerProcessor(
         this.prevFreq = freq;
         const time = globTime * freq + this.d;
         const vibrato = 0; // Math.sin(globTime * 2 * Math.PI * 7) * 2
-        channel[sample] = Math.sin(2 * Math.PI * time + vibrato);
+        channel[sample] = Math.sin(2 * Math.PI * time + vibrato) * vol;
       }
-      return this.count();
+      return true;
+      // this.count(bpm);
     }
   }
 );
