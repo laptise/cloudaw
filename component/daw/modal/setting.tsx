@@ -81,7 +81,7 @@ const SettingModal: React.FC = () => {
               <FontAwesomeIcon icon={faPlus} />
             </button>
           </label>
-          {pjt.collaborator.map((x) => (
+          {pjt?.collaborator?.map?.((x) => (
             <span key={x}>{x}</span>
           ))}
           <button type="submit">OK</button>

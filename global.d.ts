@@ -51,6 +51,10 @@ declare global {
     audioManagerState: State<AudioManager>;
   }
 
+  interface AuthContext extends UserProps {
+    uPjtStates: State<QuerySnapshot<UserProjectEntity>>;
+  }
+
   /**モーダルの表示状態 */
   interface ModalViewContext {
     settingModalViewState: State<boolean>;

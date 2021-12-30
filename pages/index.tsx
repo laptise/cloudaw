@@ -1,25 +1,54 @@
 import type { GetServerSideProps, NextPage } from "next";
-import React, { createContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useEffect, useRef, useState, useContext } from "react";
 import { FlexCol, FlexRow } from "../component/flexBox";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { FireBase } from "../firebase";
-import { collection, doc, setDoc, query, where, getDocs, addDoc, getFirestore, onSnapshot, QueryDocumentSnapshot } from "firebase/firestore";
+import { Skeleton } from "@mui/material";
+import {
+  collection,
+  doc,
+  setDoc,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  getFirestore,
+  onSnapshot,
+  QueryDocumentSnapshot,
+  DocumentReference,
+  DocumentSnapshot,
+  QuerySnapshot,
+} from "firebase/firestore";
 import Layout from "../component/Layout";
 import nookies from "nookies";
 import Link from "next/link";
 import { firebaseAdmin } from "../back/firebaseAdmin";
 import { getUserFromSession } from "../back/auth";
 import { toObject } from "../utils";
-import { clone, CollaboratorEntity, getCollabColRef, getProjectsColRef, ProjectEntity } from "../firebase/firestore";
+import {
+  clone,
+  CollaboratorEntity,
+  getCollabColRef,
+  getProjectDocRef,
+  getProjectsColRef,
+  getUserInfoDocRef,
+  getUserProjectColRef,
+  ProjectConverter,
+  ProjectEntity,
+  UserProjectEntity,
+} from "../firebase/firestore";
 import { db } from "../db";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 interface PjtProps {
   pjtState: State<QueryDocumentSnapshot<ProjectEntity>[]>;
+  uPjtState: State<QuerySnapshot<UserProjectEntity>>;
 }
 interface Props {
-  project: QueryDocumentSnapshot<ProjectEntity>;
+  uPjt: UserProjectEntity;
 }
+const AuthContext = createContext<AuthContext>(null as any);
+
 function formatBytes(bytes: number, decimals = 2) {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
@@ -29,8 +58,7 @@ function formatBytes(bytes: number, decimals = 2) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 }
 
-const ProjectOverView: React.FC<Props> = ({ project }) => {
-  const { name } = project.data();
+const Project: React.FC<{ project: DocumentSnapshot<ProjectEntity> }> = ({ project }) => {
   const [size, setSize] = useState<string>();
   const collaboratorsRef = useRef(getCollabColRef(project.ref));
   const [collaborators, setCoolaborators] = useState<QueryDocumentSnapshot<CollaboratorEntity>[]>();
@@ -51,19 +79,22 @@ const ProjectOverView: React.FC<Props> = ({ project }) => {
       await getSize();
     }
   };
+
   const attachListener = () => {
-    return onSnapshot(collaboratorsRef.current, (snapshot) => {
+    const collabs = onSnapshot(collaboratorsRef.current, (snapshot) => {
       setCoolaborators(snapshot.docs);
     });
+    return collabs;
   };
   useEffect(() => {
     getSize();
     return attachListener();
   }, []);
+
   return (
     <FlexCol className="singleProject">
       <FlexRow className="header">
-        {name}
+        {project?.data()?.name}
         <FlexRow style={{ marginLeft: "auto", gap: 10 }}>
           {collaborators?.map((collaborator) => (
             <div key={collaborator.id}>{collaborator.data().displayName}</div>
@@ -85,31 +116,81 @@ const ProjectOverView: React.FC<Props> = ({ project }) => {
     </FlexCol>
   );
 };
+const ProjectOverView: React.FC<Props> = ({ uPjt }) => {
+  const [project, setProject] = useState<DocumentSnapshot<ProjectEntity>>();
+  const attachListener = () => {
+    const pjt = onSnapshot(uPjt.projectRef, (snapshot) => {
+      setProject(snapshot);
+    });
+    return pjt;
+  };
 
-const SelectProject: React.FC<PjtProps> = ({ pjtState }) => {
-  const [pjtList] = pjtState;
+  useEffect(() => attachListener(), []);
+  return project ? (
+    <Project project={project} />
+  ) : (
+    <FlexCol className="singleProject">
+      <FlexRow className="header">
+        <Skeleton variant="text" width="30%" />
+        <FlexRow style={{ marginLeft: "auto", gap: 10 }}>
+          <Skeleton variant="text" width="50%" />
+        </FlexRow>
+      </FlexRow>
+      <FlexCol className="projectInfo">
+        <FlexRow className="singleDetail">
+          <Skeleton variant="text" width="100%" />
+        </FlexRow>
+      </FlexCol>
+      <Skeleton variant="text" width={200} />
+    </FlexCol>
+  );
+};
+
+const SelectProject: React.FC<PjtProps> = ({ uPjtState }) => {
+  const [uPjt] = uPjtState;
+  const [pjtList, setPjtList] = useState<UserProjectEntity[]>();
+  useEffect(() => {
+    setPjtList(uPjt?.docs?.map((x) => x.data()));
+  }, []);
   return (
     <FlexCol id="selectProject" style={{ width: "100%" }}>
-      {pjtList.map((pjt, index) => (
-        <ProjectOverView project={pjt} key={index} />
+      {pjtList?.map((pjt, index) => (
+        <ProjectOverView uPjt={pjt} key={index} />
       ))}
     </FlexCol>
   );
 };
 
-const NewProject: React.FC<PjtProps> = ({ pjtState }) => {
+interface NewPrjProp {
+  isNewState: State<boolean>;
+}
+
+const NewProject: React.FC<NewPrjProp> = ({ isNewState }) => {
+  const { user, uPjtStates } = useContext(AuthContext);
+  const [isNew, setIsNew] = isNewState;
   const [pjtNm, setPjtNm] = useState("");
+  console.log(uPjtStates);
   const addNewProject = async () => {
-    const uid = getAuth().currentUser?.uid as string;
-    const projectRef = await getProjectsColRef();
+    const { uid } = user;
+    const userInfoDocRef = getUserInfoDocRef(user.uid);
+    const userProjectColRef = getUserProjectColRef(userInfoDocRef);
+    const projectRef = getProjectsColRef();
+
     const newProject = (() => {
       const newPjt = new ProjectEntity();
       newPjt.owner = uid;
       newPjt.name = pjtNm;
       newPjt.trackList = [];
+      newPjt.bpm = 100;
+      newPjt.bar = 64;
       return newPjt;
     })();
     const newRef = await addDoc(projectRef, newProject);
+    await addDoc(userProjectColRef, {
+      isOwner: true,
+      projectRef: doc(projectRef, newRef.id), //プロジェクト参照が格納できない
+    });
+    setIsNew(false);
   };
   return (
     <FlexCol id="settingForNew">
@@ -127,7 +208,10 @@ const Dashboard = ({ user }: UserProps) => {
   const [owning, setOwning] = useState<QueryDocumentSnapshot<ProjectEntity>[]>();
   const [collaborating, setCollaborating] = useState<QueryDocumentSnapshot<ProjectEntity>[]>();
   const [pjtList, setPjtList] = pjtListState;
-  const [isNew, setIsNew] = useState(false);
+  const userProjectEntityListState = useState<QuerySnapshot<UserProjectEntity>>([] as any);
+  const [uPjtEntities, setUPjtEntities] = userProjectEntityListState;
+  const isNewState = useState(false);
+  const [isNew, setIsNew] = isNewState;
   const getList = async () => {
     FireBase.init();
     const pjtRef = getProjectsColRef();
@@ -143,33 +227,48 @@ const Dashboard = ({ user }: UserProps) => {
       setPjtList([...owning, ...coling]);
     }
   };
+
+  const attach = () => {
+    const userInfoDocRef = getUserInfoDocRef(user.uid);
+    const userProjectColRef = getUserProjectColRef(userInfoDocRef);
+    const userInfo = onSnapshot(userInfoDocRef, (snapshot) => {
+      console.log(snapshot);
+    });
+    const userProjects = onSnapshot(userProjectColRef, (snapshot) => {
+      setUPjtEntities(snapshot);
+    });
+    return () => [userInfo, userProjects].forEach((x) => x());
+  };
+
+  const authContextInit: AuthContext = { user, uPjtStates: userProjectEntityListState };
   useEffect(() => {
-    console.log("index");
     getList();
+    return attach();
   }, []);
   return (
-    <Layout user={user}>
-      <div id="dashboard">
-        <FlexCol className="window">
-          <FlexCol className="header">
-            <span>プロジェクトを選択してください</span>
-          </FlexCol>
-          <FlexRow className="body content">
-            <FlexCol className="modeSelect">
-              <button onClick={() => setIsNew(false)}>既存のプロジェクト</button>
-              <button onClick={() => setIsNew(true)}>新規のプロジェクト</button>
+    <AuthContext.Provider value={authContextInit}>
+      <Layout user={user}>
+        <div id="dashboard">
+          <FlexCol className="window">
+            <FlexCol className="header">
+              <span>プロジェクトを選択してください</span>
             </FlexCol>
-            {isNew ? <NewProject pjtState={pjtListState} /> : <SelectProject pjtState={pjtListState} />}
-          </FlexRow>
-        </FlexCol>
-      </div>
-    </Layout>
+            <FlexRow className="body content">
+              <FlexCol className="modeSelect">
+                <button onClick={() => setIsNew(false)}>既存のプロジェクト</button>
+                <button onClick={() => setIsNew(true)}>新規のプロジェクト</button>
+              </FlexCol>
+              {isNew ? <NewProject isNewState={isNewState} /> : <SelectProject uPjtState={userProjectEntityListState} pjtState={pjtListState} />}
+            </FlexRow>
+          </FlexCol>
+        </div>
+      </Layout>
+    </AuthContext.Provider>
   );
 };
 
 // This gets called on every request
 export const getServerSideProps: GetServerSideProps<UserProps> = async (ctx) => {
-  console.log("indexed");
   const user = await getUserFromSession(ctx);
   if (user) return { props: { user: toObject(user) } };
   else {

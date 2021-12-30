@@ -38,6 +38,21 @@ export class BaseEntity {
   }
 }
 
+export class UserProjectEntity {
+  isOwner!: boolean;
+  projectRef!: DocumentReference<ProjectEntity>;
+  constructor(isOwner: boolean, projectRef: DocumentReference<ProjectEntity>) {
+    this.isOwner = isOwner;
+    this.projectRef = projectRef;
+  }
+}
+
+export class UserInfoEntity extends BaseEntity {
+  name!: string;
+  isLoggingIn!: boolean;
+  loggedOutAt!: Date;
+}
+
 export class TrackEntity extends BaseEntity {
   name!: string;
   regions!: RegionEntity[];
@@ -113,6 +128,16 @@ export const ProjectConverter: FirestoreDataConverter<ProjectEntity> = {
   },
 };
 
+export const UserProjectConverter: FirestoreDataConverter<UserProjectEntity> = {
+  toFirestore(post) {
+    return { ...toObject(post) };
+  },
+  fromFirestore(snapshot, options) {
+    const data = snapshot.data(options)!;
+    return new UserProjectEntity(data.isOwner, data.projectRef);
+  },
+};
+
 export const getProjectsColRef = () => {
   const db = FireBase.fireStore();
   return collection(db, "project").withConverter(ProjectConverter);
@@ -141,3 +166,13 @@ export const getFocusColRef = (docRef: DocumentReference<ProjectEntity>) => coll
 export const getFocusDocRef = (colRef: CollectionReference<FocusEntity>, uid: string) => doc(colRef, uid);
 
 export const getProjectWavsRef = (docRef: DocumentReference<ProjectEntity>) => ref(FireBase.storage(), `projects/${docRef.id}`);
+
+export const getUserInfoColRef = () => {
+  const db = FireBase.fireStore();
+  return collection(db, "user").withConverter(dynamicConverter(UserInfoEntity));
+};
+
+export const getUserInfoDocRef = (uid: string) => doc(getUserInfoColRef(), uid);
+
+export const getUserProjectColRef = (docRef: DocumentReference<UserInfoEntity>) =>
+  collection(docRef, "userProject").withConverter(UserProjectConverter);

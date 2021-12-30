@@ -41,7 +41,10 @@
   input.focusChecker[type="radio"] {
     display: none;
   }
-  input.focusChecker[type="radio"]:checked + .focusTarget {
+  .focusTarget {
+    filter: none;
+  }
+  input.focusChecker[type="radio"]:checked ~ .focusTarget {
     filter: brightness(1.3);
   }
   .focusLabel {
