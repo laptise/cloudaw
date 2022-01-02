@@ -1,6 +1,7 @@
 import { DocumentReference, QueryDocumentSnapshot, QuerySnapshot } from "@firebase/firestore";
 import { Dispatch, SetStateAction } from "react";
-import { ProjectEntity, TrackEntity, UserProjectEntity } from "./firebase/firestore";
+import { UserRecord } from "firebase-admin/lib/auth/user-record";
+import { ProjectEntity, TrackEntity, UserInfoEntity, UserProjectEntity } from "./firebase/firestore";
 import { TimeContext } from "./utils";
 import { AudioNodeGenerator } from "./audioCore/audioNodes";
 declare global {
@@ -53,6 +54,7 @@ declare global {
 
   interface AuthContext extends UserProps {
     uPjtStates: State<QuerySnapshot<UserProjectEntity>>;
+    userRef: DocumentReference<UserInfoEntity>;
   }
 
   /**モーダルの表示状態 */

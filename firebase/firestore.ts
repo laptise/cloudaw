@@ -42,7 +42,6 @@ export class UserProjectEntity {
   isOwner!: boolean;
   projectRef!: DocumentReference<ProjectEntity>;
   constructor(isOwner: boolean, projectRef: DocumentReference<ProjectEntity>) {
-    console.log(projectRef);
     this.isOwner = isOwner;
     this.projectRef = projectRef;
   }
@@ -95,16 +94,21 @@ export class FocusInfo extends BaseEntity {
 }
 
 export class CollaboratorEntity extends BaseEntity {
-  color!: string;
-  focusing!: string;
-  isOwner!: boolean;
-  displayName!: string;
+  user!: DocumentReference<UserInfoEntity>;
+  color?: string;
+  focusing?: string;
+  isOwner?: boolean;
+  displayName?: string;
 }
 
-export function dynamicConverter<T extends object>(constructor: new (data?: object) => T) {
+export function dynamicConverter<T extends object>(constructor: new (data?: object) => T, exceptThisKey?: (keyof T)[]) {
   const converter: FirestoreDataConverter<T> = {
     toFirestore(data) {
-      return { ...toObject(data) };
+      const toPost = toObject(data) as any;
+      exceptThisKey?.forEach?.((keyName) => {
+        delete toPost.keyName;
+      });
+      return toPost;
     },
     fromFirestore(snapshot, options) {
       const data = snapshot.data(options)!;
@@ -121,7 +125,9 @@ export function dynamicConverter<T extends object>(constructor: new (data?: obje
 
 export const ProjectConverter: FirestoreDataConverter<ProjectEntity> = {
   toFirestore(post) {
-    return { ...toObject(post) };
+    const toPost = toObject(post);
+    delete toPost.collaborator;
+    return toPost;
   },
   fromFirestore(snapshot, options) {
     const data = snapshot.data(options)!;

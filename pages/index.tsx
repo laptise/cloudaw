@@ -5,19 +5,16 @@ import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "firebas
 import { FireBase } from "../firebase";
 import { Skeleton } from "@mui/material";
 import {
-  collection,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
+  DocumentSnapshot,
+  onSnapshot,
+  addDoc,
   doc,
-  setDoc,
   query,
   where,
   getDocs,
-  addDoc,
-  getFirestore,
-  onSnapshot,
-  QueryDocumentSnapshot,
   DocumentReference,
-  DocumentSnapshot,
-  QuerySnapshot,
 } from "firebase/firestore";
 import Layout from "../component/Layout";
 import nookies from "nookies";
@@ -35,18 +32,23 @@ import {
   getUserProjectColRef,
   ProjectConverter,
   ProjectEntity,
+  UserInfoEntity,
   UserProjectEntity,
 } from "../firebase/firestore";
 import { db } from "../db";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
+import { utls } from "../utils/utls";
+
 interface PjtProps {
   pjtState: State<QueryDocumentSnapshot<ProjectEntity>[]>;
   uPjtState: State<QuerySnapshot<UserProjectEntity>>;
 }
+
 interface Props {
   uPjt: UserProjectEntity;
 }
+
 const AuthContext = createContext<AuthContext>(null as unknown as AuthContext);
 
 function formatBytes(bytes: number, decimals = 2) {
@@ -119,10 +121,8 @@ const Project: React.FC<{ project: DocumentSnapshot<ProjectEntity> }> = ({ proje
 const ProjectOverView: React.FC<Props> = ({ uPjt }) => {
   const [project, setProject] = useState<DocumentSnapshot<ProjectEntity>>();
   const attachListener = () => {
-    console.log(uPjt);
     const pjt = onSnapshot(uPjt.projectRef, (snapshot) => {
-      console.log(snapshot);
-      // setProject(snapshot);
+      setProject(snapshot);
     });
     return pjt;
   };
@@ -154,7 +154,6 @@ const SelectProject: React.FC = () => {
   const [pjtList, setPjtList] = useState<UserProjectEntity[]>();
   useEffect(() => {
     if (uPjt?.docs) {
-      console.log(uPjt.docs.map((x) => x.data()));
       setPjtList(uPjt?.docs?.map((x) => x.data()));
     }
   }, []);
@@ -175,29 +174,12 @@ const NewProject: React.FC<NewPrjProp> = ({ isNewState }) => {
   const { user, uPjtStates } = useContext(AuthContext);
   const [isNew, setIsNew] = isNewState;
   const [pjtNm, setPjtNm] = useState("");
-  console.log(uPjtStates);
-  const addNewProject = async () => {
-    const { uid } = user;
-    const userInfoDocRef = getUserInfoDocRef(user.uid);
-    const userProjectColRef = getUserProjectColRef(userInfoDocRef);
-    const projectRef = getProjectsColRef();
 
-    const newProject = (() => {
-      const newPjt = new ProjectEntity();
-      newPjt.owner = uid;
-      newPjt.name = pjtNm;
-      newPjt.trackList = [];
-      newPjt.bpm = 100;
-      newPjt.bar = 64;
-      return newPjt;
-    })();
-    const newRef = await addDoc(projectRef, newProject);
-    await addDoc(userProjectColRef, {
-      isOwner: true,
-      projectRef: doc(projectRef, newRef.id), //プロジェクト参照が格納できない
-    });
+  async function addNewProject() {
+    await utls.project.addProject(user, pjtNm);
     setIsNew(false);
-  };
+  }
+
   return (
     <FlexCol id="settingForNew">
       <FlexCol>
@@ -216,6 +198,7 @@ const Dashboard = ({ user }: UserProps) => {
   const [pjtList, setPjtList] = pjtListState;
   const userProjectEntityListState = useState<QuerySnapshot<UserProjectEntity>>([] as any);
   const [uPjtEntities, setUPjtEntities] = userProjectEntityListState;
+  const [userInfo, setUserInfo] = useState<DocumentReference<UserInfoEntity>>(null as any);
   const isNewState = useState(false);
   const [isNew, setIsNew] = isNewState;
   const getList = async () => {
@@ -237,14 +220,16 @@ const Dashboard = ({ user }: UserProps) => {
   const attach = () => {
     const userInfoDocRef = getUserInfoDocRef(user.uid);
     const userProjectColRef = getUserProjectColRef(userInfoDocRef);
-    const userInfo = onSnapshot(userInfoDocRef, (snapshot) => {});
+    const userInfo = onSnapshot(userInfoDocRef, (snapshot) => {
+      setUserInfo(snapshot.ref);
+    });
     const userProjects = onSnapshot(userProjectColRef, (snapshot) => {
       setUPjtEntities(snapshot);
     });
     return () => [userInfo, userProjects].forEach((x) => x());
   };
 
-  const authContextInit: AuthContext = { user, uPjtStates: userProjectEntityListState };
+  const authContextInit: AuthContext = { user, uPjtStates: userProjectEntityListState, userRef: userInfo };
 
   useEffect(() => {
     // getList();
