@@ -171,12 +171,12 @@ interface NewPrjProp {
 }
 
 const NewProject: React.FC<NewPrjProp> = ({ isNewState }) => {
-  const { user, uPjtStates } = useContext(AuthContext);
+  const { user, uPjtStates, userRef } = useContext(AuthContext);
   const [isNew, setIsNew] = isNewState;
   const [pjtNm, setPjtNm] = useState("");
 
   async function addNewProject() {
-    await utls.project.addProject(user, pjtNm);
+    await utls.project.addProject(userRef, user, pjtNm);
     setIsNew(false);
   }
 
