@@ -47,7 +47,7 @@ interface PjtProps {
 interface Props {
   uPjt: UserProjectEntity;
 }
-const AuthContext = createContext<AuthContext>(null as any);
+const AuthContext = createContext<AuthContext>(null as unknown as AuthContext);
 
 function formatBytes(bytes: number, decimals = 2) {
   if (bytes === 0) return "0 Bytes";
@@ -119,8 +119,10 @@ const Project: React.FC<{ project: DocumentSnapshot<ProjectEntity> }> = ({ proje
 const ProjectOverView: React.FC<Props> = ({ uPjt }) => {
   const [project, setProject] = useState<DocumentSnapshot<ProjectEntity>>();
   const attachListener = () => {
+    console.log(uPjt);
     const pjt = onSnapshot(uPjt.projectRef, (snapshot) => {
-      setProject(snapshot);
+      console.log(snapshot);
+      // setProject(snapshot);
     });
     return pjt;
   };
@@ -146,11 +148,15 @@ const ProjectOverView: React.FC<Props> = ({ uPjt }) => {
   );
 };
 
-const SelectProject: React.FC<PjtProps> = ({ uPjtState }) => {
-  const [uPjt] = uPjtState;
+const SelectProject: React.FC = () => {
+  const { uPjtStates } = useContext(AuthContext);
+  const [uPjt] = uPjtStates;
   const [pjtList, setPjtList] = useState<UserProjectEntity[]>();
   useEffect(() => {
-    setPjtList(uPjt?.docs?.map((x) => x.data()));
+    if (uPjt?.docs) {
+      console.log(uPjt.docs.map((x) => x.data()));
+      setPjtList(uPjt?.docs?.map((x) => x.data()));
+    }
   }, []);
   return (
     <FlexCol id="selectProject" style={{ width: "100%" }}>
@@ -231,9 +237,7 @@ const Dashboard = ({ user }: UserProps) => {
   const attach = () => {
     const userInfoDocRef = getUserInfoDocRef(user.uid);
     const userProjectColRef = getUserProjectColRef(userInfoDocRef);
-    const userInfo = onSnapshot(userInfoDocRef, (snapshot) => {
-      console.log(snapshot);
-    });
+    const userInfo = onSnapshot(userInfoDocRef, (snapshot) => {});
     const userProjects = onSnapshot(userProjectColRef, (snapshot) => {
       setUPjtEntities(snapshot);
     });
@@ -241,8 +245,9 @@ const Dashboard = ({ user }: UserProps) => {
   };
 
   const authContextInit: AuthContext = { user, uPjtStates: userProjectEntityListState };
+
   useEffect(() => {
-    getList();
+    // getList();
     return attach();
   }, []);
   return (
@@ -258,7 +263,7 @@ const Dashboard = ({ user }: UserProps) => {
                 <button onClick={() => setIsNew(false)}>既存のプロジェクト</button>
                 <button onClick={() => setIsNew(true)}>新規のプロジェクト</button>
               </FlexCol>
-              {isNew ? <NewProject isNewState={isNewState} /> : <SelectProject uPjtState={userProjectEntityListState} pjtState={pjtListState} />}
+              {isNew ? <NewProject isNewState={isNewState} /> : <SelectProject />}
             </FlexRow>
           </FlexCol>
         </div>

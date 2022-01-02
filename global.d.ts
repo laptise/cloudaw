@@ -1,6 +1,6 @@
-import { DocumentReference, QueryDocumentSnapshot } from "@firebase/firestore";
+import { DocumentReference, QueryDocumentSnapshot, QuerySnapshot } from "@firebase/firestore";
 import { Dispatch, SetStateAction } from "react";
-import { ProjectEntity, TrackEntity } from "./firebase/firestore";
+import { ProjectEntity, TrackEntity, UserProjectEntity } from "./firebase/firestore";
 import { TimeContext } from "./utils";
 import { AudioNodeGenerator } from "./audioCore/audioNodes";
 declare global {

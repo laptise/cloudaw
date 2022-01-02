@@ -42,6 +42,7 @@ export class UserProjectEntity {
   isOwner!: boolean;
   projectRef!: DocumentReference<ProjectEntity>;
   constructor(isOwner: boolean, projectRef: DocumentReference<ProjectEntity>) {
+    console.log(projectRef);
     this.isOwner = isOwner;
     this.projectRef = projectRef;
   }
@@ -130,7 +131,7 @@ export const ProjectConverter: FirestoreDataConverter<ProjectEntity> = {
 
 export const UserProjectConverter: FirestoreDataConverter<UserProjectEntity> = {
   toFirestore(post) {
-    return { ...toObject(post) };
+    return { isOwner: post.isOwner, projectRef: post.projectRef };
   },
   fromFirestore(snapshot, options) {
     const data = snapshot.data(options)!;
