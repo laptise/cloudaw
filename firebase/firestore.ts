@@ -95,7 +95,7 @@ export class FocusInfo extends BaseEntity {
 
 export class CollaboratorEntity extends BaseEntity {
   user!: DocumentReference<UserInfoEntity>;
-  color?: string;
+  color!: string;
   focusing?: string;
   isOwner?: boolean;
   displayName?: string;
